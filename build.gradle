@@ -17,11 +17,11 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.5.4'
+    implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.5.4'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
-    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.19'
+    implementation 'io.jsonwebtoken:jjwt:0.9.0'
     implementation "org.springframework.boot:spring-boot-starter-data-jpa"
     implementation "org.springframework.boot:spring-boot-starter-security"
     implementation "org.springframework.boot:spring-boot-starter-web"
