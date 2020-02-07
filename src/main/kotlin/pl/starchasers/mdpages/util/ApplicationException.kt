@@ -1,4 +1,4 @@
-package pl.starchasers.mdpages
+package pl.starchasers.mdpages.util
 
 import java.lang.RuntimeException
 

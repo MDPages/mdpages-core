@@ -5,16 +5,18 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import pl.starchasers.mdpages.Util
+import pl.starchasers.mdpages.util.Util
 import pl.starchasers.mdpages.user.UserNotFoundException
 import pl.starchasers.mdpages.user.UserService
 import pl.starchasers.mdpages.user.data.User
 import java.time.LocalDateTime
 import java.util.*
 
+private const val TOKEN_ID_KEY = "tokenId"
 
+//TODO exception handling
 @Service
-class TokenService(val refreshTokenRepository: RefreshTokenRepository, val userService: UserService) {
+class TokenService(private val refreshTokenRepository: RefreshTokenRepository, private val userService: UserService) {
 
     @Value("\${jwt.secret}")
     private val secret = ""
@@ -22,13 +24,12 @@ class TokenService(val refreshTokenRepository: RefreshTokenRepository, val userS
     private val refreshTokenValidTime: Long = 7 * 24 * 60 * 60 * 1000
     private val accessTokenValidTime: Long = 15 * 60 * 1000
 
-
     fun issueRefreshToken(user: User): String {
         val claims = Jwts.claims().setSubject(user.id.toString())
         val now = Date()
-        val tokenId = Util.randomString(64)
+        val tokenId = UUID.randomUUID().toString()
 
-        claims["tokenId"] = tokenId
+        claims[TOKEN_ID_KEY] = tokenId
         val refreshToken = RefreshToken(
             0,
             user,
@@ -51,7 +52,7 @@ class TokenService(val refreshTokenRepository: RefreshTokenRepository, val userS
         val oldClaims = parseToken(oldRefreshToken)
         val user = userService.getUser(oldClaims.subject?.toLong() ?: throw UserNotFoundException())
 
-        verifyRefreshToken(oldClaims["tokenId"] as String, user)
+        verifyRefreshToken(oldClaims[TOKEN_ID_KEY] as String, user)
 
         return issueRefreshToken(user)
     }
@@ -62,6 +63,9 @@ class TokenService(val refreshTokenRepository: RefreshTokenRepository, val userS
         val user = userService.getUser(refreshTokenClaims.subject?.toLong() ?: throw UserNotFoundException())
 
         val claims = Jwts.claims().setSubject(user.id.toString())
+
+        verifyRefreshToken(refreshTokenClaims[TOKEN_ID_KEY] as String, user)
+
         val now = Date()
 
         return Jwts.builder()
@@ -81,5 +85,10 @@ class TokenService(val refreshTokenRepository: RefreshTokenRepository, val userS
 
     fun invalidateUser(user: User) {
         refreshTokenRepository.deleteAllByUser(user)
+    }
+
+    fun invalidateRefreshToken(refreshToken: String) {
+        val claims = parseToken(refreshToken)
+        refreshTokenRepository.deleteAllByToken(claims[TOKEN_ID_KEY] as String)
     }
 }

@@ -5,7 +5,8 @@ import org.springframework.stereotype.Repository
 import pl.starchasers.mdpages.user.data.User
 
 @Repository
-interface UserRepository : JpaRepository<User, Long>{
+interface UserRepository : JpaRepository<User, Long> {
     fun getFirstById(id: Long): User?
 
+    fun getFirstByUsername(username: String): User?
 }

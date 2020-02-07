@@ -14,4 +14,6 @@ interface RefreshTokenRepository : JpaRepository<RefreshToken, Long> {
     fun findFirstByTokenAndUser(@Param("token") token: String, @Param("user") user: User): RefreshToken?
 
     fun deleteAllByUser(user: User)
+
+    fun deleteAllByToken(token: String)
 }
