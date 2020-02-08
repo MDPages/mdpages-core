@@ -10,7 +10,7 @@ import pl.starchasers.mdpages.user.data.User
 interface RefreshTokenRepository : JpaRepository<RefreshToken, Long> {
     fun getFirstById(id: Long): RefreshToken
 
-    @Query("select t from RefreshToken t where t.id = :token and t.user = :user and t.expirationDate < sysdate")
+    @Query("select t from RefreshToken t where t.token = :token and t.user = :user")
     fun findFirstByTokenAndUser(@Param("token") token: String, @Param("user") user: User): RefreshToken?
 
     fun deleteAllByUser(user: User)

@@ -25,7 +25,7 @@ class TokenService(private val refreshTokenRepository: RefreshTokenRepository, p
     private val accessTokenValidTime: Long = 15 * 60 * 1000
 
     fun issueRefreshToken(user: User): String {
-        val claims = Jwts.claims().setSubject(user.id.toString())
+        val claims = Jwts.claims().setSubject(user.username)
         val now = Date()
         val tokenId = UUID.randomUUID().toString()
 
@@ -50,7 +50,7 @@ class TokenService(private val refreshTokenRepository: RefreshTokenRepository, p
 
     fun refreshRefreshToken(oldRefreshToken: String): String {
         val oldClaims = parseToken(oldRefreshToken)
-        val user = userService.getUser(oldClaims.subject?.toLong() ?: throw UserNotFoundException())
+        val user = userService.getUserByUsername(oldClaims.subject ?: throw UserNotFoundException())
 
         verifyRefreshToken(oldClaims[TOKEN_ID_KEY] as String, user)
 
@@ -60,9 +60,9 @@ class TokenService(private val refreshTokenRepository: RefreshTokenRepository, p
 
     fun issueAccessToken(refreshToken: String): String {
         val refreshTokenClaims = parseToken(refreshToken)
-        val user = userService.getUser(refreshTokenClaims.subject?.toLong() ?: throw UserNotFoundException())
+        val user = userService.getUserByUsername(refreshTokenClaims.subject ?: throw UserNotFoundException())
 
-        val claims = Jwts.claims().setSubject(user.id.toString())
+        val claims = Jwts.claims().setSubject(user.username)
 
         verifyRefreshToken(refreshTokenClaims[TOKEN_ID_KEY] as String, user)
 

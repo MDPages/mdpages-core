@@ -33,11 +33,19 @@ class UserService(private val userRepository: UserRepository, private val passwo
         passwordEncoder.matches(password, getUserByUsername(username).password)
 
     fun getUserFromCredentials(username: String, password: String): User =
-        getUserByUsername(username).takeIf { passwordEncoder.matches(it.password, password) }
+        getUserByUsername(username).takeIf { passwordEncoder.matches(password, it.password) }
             ?: throw UnauthorizedException()
 
 
-    fun registerUser(): Nothing = TODO()
+    fun createUser(username: String, password: String) {
+        val user = User(
+            0,
+            username,
+            passwordEncoder.encode(password)
+        )
+
+        userRepository.save(user)
+    }
 
 
 }

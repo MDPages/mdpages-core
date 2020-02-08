@@ -13,6 +13,6 @@ class UserController(private val userService: UserService) {
     fun getUserDetails(): Nothing = TODO()
 
     @GetMapping("/publicDetails")
-    fun getPublicUserDetails(@RequestParam): Nothing = TODO()
+    fun getPublicUserDetails(): Nothing = TODO()
 
 }

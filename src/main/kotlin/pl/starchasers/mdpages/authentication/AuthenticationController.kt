@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 import pl.starchasers.mdpages.authentication.dto.LoginDTO
 import pl.starchasers.mdpages.authentication.dto.TokenDTO
 import pl.starchasers.mdpages.authentication.dto.TokenResponseDTO
+import pl.starchasers.mdpages.security.annotation.IsUser
 import pl.starchasers.mdpages.user.UserService
 import pl.starchasers.mdpages.util.BasicResponseDTO
 import java.security.Principal
@@ -29,6 +30,7 @@ class AuthenticationController(private val tokenService: TokenService, private v
     fun getAccessToken(@Validated @RequestBody tokenDTO: TokenDTO): TokenResponseDTO =
         TokenResponseDTO(tokenService.issueAccessToken(tokenDTO.token))
 
+    @IsUser
     @PostMapping("refreshToken")
     fun refreshToken(@Validated @RequestBody tokenDTO: TokenDTO): TokenResponseDTO =
         TokenResponseDTO(tokenService.refreshRefreshToken(tokenDTO.token))
