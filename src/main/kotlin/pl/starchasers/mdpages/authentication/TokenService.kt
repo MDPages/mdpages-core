@@ -81,7 +81,13 @@ class TokenService(private val refreshTokenRepository: RefreshTokenRepository, p
         refreshTokenRepository.findFirstByTokenAndUser(token, user) ?: throw InvalidTokenException()
     }
 
-    fun parseToken(token: String): Claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).body
+    fun parseToken(token: String): Claims {
+        try {
+            return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).body
+        } catch (e: Exception) {
+            throw InvalidTokenException()
+        }
+    }
 
     fun invalidateUser(user: User) {
         refreshTokenRepository.deleteAllByUser(user)

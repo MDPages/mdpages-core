@@ -11,6 +11,7 @@ import pl.starchasers.mdpages.authentication.dto.TokenDTO
 import pl.starchasers.mdpages.authentication.dto.TokenResponseDTO
 import pl.starchasers.mdpages.security.annotation.IsUser
 import pl.starchasers.mdpages.user.UserService
+import pl.starchasers.mdpages.util.ApplicationException
 import pl.starchasers.mdpages.util.BasicResponseDTO
 import java.security.Principal
 
@@ -19,9 +20,15 @@ import java.security.Principal
 class AuthenticationController(private val tokenService: TokenService, private val userService: UserService) {
 
     @PostMapping("login")
-    fun login(@Validated @RequestBody loginDTO: LoginDTO): TokenResponseDTO = TokenResponseDTO(
-        tokenService.issueRefreshToken(userService.getUserFromCredentials(loginDTO.username, loginDTO.password))
-    )
+    fun login(@Validated @RequestBody loginDTO: LoginDTO): TokenResponseDTO {
+        try {
+            return TokenResponseDTO(
+                tokenService.issueRefreshToken(userService.getUserFromCredentials(loginDTO.username, loginDTO.password))
+            )
+        } catch (e: ApplicationException) {
+            throw AuthenticationException()
+        }
+    }
 
     @PostMapping("logOut")
     fun logOut(principal: Principal): BasicResponseDTO = TODO()
