@@ -5,8 +5,7 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import pl.starchasers.mdpages.util.Util
-import pl.starchasers.mdpages.user.UserNotFoundException
+import pl.starchasers.mdpages.user.exception.UserNotFoundException
 import pl.starchasers.mdpages.user.UserService
 import pl.starchasers.mdpages.user.data.User
 import java.time.LocalDateTime
