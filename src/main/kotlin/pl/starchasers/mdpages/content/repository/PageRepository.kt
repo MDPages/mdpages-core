@@ -1,4 +1,4 @@
-package pl.starchasers.mdpages.content
+package pl.starchasers.mdpages.content.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository

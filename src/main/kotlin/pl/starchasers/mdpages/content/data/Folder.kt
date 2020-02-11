@@ -3,6 +3,7 @@ package pl.starchasers.mdpages.content.data
 import pl.starchasers.mdpages.content.ObjectType
 import javax.persistence.*
 
+
 @Entity
 class Folder(
 
