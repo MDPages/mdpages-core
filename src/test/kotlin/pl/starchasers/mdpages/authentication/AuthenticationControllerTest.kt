@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import pl.starchasers.mdpages.authentication.dto.LoginDTO
 import org.hamcrest.*
 import org.hamcrest.CoreMatchers.*
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.*
 import pl.starchasers.mdpages.authentication.dto.TokenDTO
 import success
@@ -24,6 +25,7 @@ import success
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WebAppConfiguration
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 internal class AuthenticationControllerTest(
     @Autowired private val userService: UserService,
     @Autowired private val webApplicationContext: WebApplicationContext,

@@ -2,6 +2,7 @@ package pl.starchasers.mdpages.user
 
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import pl.starchasers.mdpages.authentication.UnauthorizedException
 import pl.starchasers.mdpages.user.data.User
 import pl.starchasers.mdpages.user.exception.MalformedPasswordException
@@ -75,5 +76,10 @@ class UserService(private val userRepository: UserRepository, private val passwo
 
     private fun validatePassword(password: String) {
         if (password.length < MIN_PASSWORD_LENGTH || password.length > MAX_PASSWORD_LENGTH) throw MalformedPasswordException()
+    }
+
+    @Transactional
+    fun deleteUser(username: String) {
+        userRepository.deleteAllByUsername(username)
     }
 }
