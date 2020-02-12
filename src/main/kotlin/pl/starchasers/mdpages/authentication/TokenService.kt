@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import pl.starchasers.mdpages.user.exception.UserNotFoundException
 import pl.starchasers.mdpages.user.UserService
 import pl.starchasers.mdpages.user.data.User
@@ -24,7 +25,7 @@ class TokenService(private val refreshTokenRepository: RefreshTokenRepository, p
     private val accessTokenValidTime: Long = 15 * 60 * 1000
 
     fun issueRefreshToken(user: User): String {
-        val claims = Jwts.claims().setSubject(user.username)
+        val claims = Jwts.claims().setSubject(user.id.toString())
         val now = Date()
         val tokenId = UUID.randomUUID().toString()
 
@@ -49,7 +50,7 @@ class TokenService(private val refreshTokenRepository: RefreshTokenRepository, p
 
     fun refreshRefreshToken(oldRefreshToken: String): String {
         val oldClaims = parseToken(oldRefreshToken)
-        val user = userService.getUserByUsername(oldClaims.subject ?: throw UserNotFoundException())
+        val user = userService.getUser(oldClaims.subject.toLong())
 
         verifyRefreshToken(oldClaims[TOKEN_ID_KEY] as String, user)
 
@@ -59,9 +60,9 @@ class TokenService(private val refreshTokenRepository: RefreshTokenRepository, p
 
     fun issueAccessToken(refreshToken: String): String {
         val refreshTokenClaims = parseToken(refreshToken)
-        val user = userService.getUserByUsername(refreshTokenClaims.subject ?: throw UserNotFoundException())
+        val user = userService.getUser(refreshTokenClaims.subject.toLong())
 
-        val claims = Jwts.claims().setSubject(user.username)
+        val claims = Jwts.claims().setSubject(user.id.toString())
 
         verifyRefreshToken(refreshTokenClaims[TOKEN_ID_KEY] as String, user)
 
@@ -92,6 +93,7 @@ class TokenService(private val refreshTokenRepository: RefreshTokenRepository, p
         refreshTokenRepository.deleteAllByUser(user)
     }
 
+    @Transactional
     fun invalidateRefreshToken(refreshToken: String) {
         val claims = parseToken(refreshToken)
         refreshTokenRepository.deleteAllByToken(claims[TOKEN_ID_KEY] as String)
