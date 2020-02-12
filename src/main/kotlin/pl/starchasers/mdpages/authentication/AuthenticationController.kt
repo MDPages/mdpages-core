@@ -37,7 +37,6 @@ class AuthenticationController(private val tokenService: TokenService, private v
     fun getAccessToken(@Validated @RequestBody tokenDTO: TokenDTO): TokenResponseDTO =
         TokenResponseDTO(tokenService.issueAccessToken(tokenDTO.token))
 
-    @IsUser
     @PostMapping("refreshToken")
     fun refreshToken(@Validated @RequestBody tokenDTO: TokenDTO): TokenResponseDTO =
         TokenResponseDTO(tokenService.refreshRefreshToken(tokenDTO.token))

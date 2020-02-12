@@ -2,7 +2,6 @@ package pl.starchasers.mdpages.util
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.stereotype.Repository
 import pl.starchasers.mdpages.content.ContentService
 import pl.starchasers.mdpages.content.DEFAULT_SCOPE_PATH
 import pl.starchasers.mdpages.content.data.Folder
@@ -55,6 +54,6 @@ class Initializer(
     private fun verifyRootPermissions() {
         val root = userService.getUserByUsername("root")
         if (!permissionService.hasGlobalPermission(PermissionType.ADMIN, root))
-            permissionService.giveGlobalPermission(PermissionType.ADMIN, root)
+            permissionService.grantGlobalPermission(PermissionType.ADMIN, root)
     }
 }

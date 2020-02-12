@@ -12,5 +12,6 @@ class ContentController() {
     @GetMapping("/o/**")
     fun getContent(request: HttpServletRequest) {
         println(request.servletPath.removePrefix("/api/content/o/"))
+        TODO()
     }
 }

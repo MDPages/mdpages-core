@@ -9,4 +9,6 @@ interface UserRepository : JpaRepository<User, Long> {
     fun getFirstById(id: Long): User?
 
     fun getFirstByUsername(username: String): User?
+
+    fun deleteAllByUsername(username: String)
 }

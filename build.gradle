@@ -31,6 +31,8 @@ dependencies {
 //        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
 //    }
     testImplementation "org.springframework.security:spring-security-test"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine"
+    testImplementation "com.h2database:h2:1.4.200"
 }
 
 compileKotlin {
@@ -38,4 +40,8 @@ compileKotlin {
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+test {
+    useJUnitPlatform()
 }

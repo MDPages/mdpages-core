@@ -1,6 +1,7 @@
 package pl.starchasers.mdpages.security.permission
 
 import org.springframework.stereotype.Service
+import pl.starchasers.mdpages.authentication.UnauthorizedException
 import pl.starchasers.mdpages.content.ContentService
 import pl.starchasers.mdpages.user.UserService
 import pl.starchasers.mdpages.user.data.User
@@ -22,12 +23,15 @@ class PermissionService(
     fun hasGlobalPermission(permissionType: PermissionType, userId: Long): Boolean =
         hasGlobalPermission(permissionType, userService.getUser(userId))
 
+    fun hasGlobalPermission(permissionType: PermissionType, userId: String): Boolean =
+        userId.toLongOrNull()?.let { hasGlobalPermission(permissionType, it) } ?: false
+
     fun hasScopePermission(scopePath: String, permissionType: PermissionType, user: User): Boolean = TODO()
 
     fun hasScopePermission(scopePath: String, permissionType: PermissionType, userId: Long): Boolean =
         hasScopePermission(scopePath, permissionType, userService.getUser(userId))
 
-    fun giveGlobalPermission(permissionType: PermissionType, user: User): Permission =
+    fun grantGlobalPermission(permissionType: PermissionType, user: User): Permission =
         Permission(
             contentService.getDefaultScope(),
             permissionType,
