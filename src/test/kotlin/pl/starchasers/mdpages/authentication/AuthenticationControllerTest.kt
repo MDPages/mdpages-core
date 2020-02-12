@@ -1,11 +1,8 @@
 package pl.starchasers.mdpages.authentication
 
-import antlr.Token
 import com.fasterxml.jackson.databind.ObjectMapper
 import errorThrown
-import org.apache.catalina.connector.Request
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
@@ -13,34 +10,27 @@ import org.springframework.test.context.web.WebAppConfiguration
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import pl.starchasers.mdpages.user.UserService
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import pl.starchasers.mdpages.authentication.dto.LoginDTO
-import org.hamcrest.*
 import org.hamcrest.CoreMatchers.*
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.*
 import pl.starchasers.mdpages.authentication.dto.TokenDTO
 import success
 
-@SpringBootTest
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@WebAppConfiguration
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@SpringBootTest
+@AutoConfigureMockMvc
 internal class AuthenticationControllerTest(
+    @Autowired private val mockMvc: MockMvc,
     @Autowired private val userService: UserService,
-    @Autowired private val webApplicationContext: WebApplicationContext,
     @Autowired private val tokenService: TokenService
 ) {
 
-    private lateinit var mockMvc: MockMvc
     @Autowired
     lateinit var mapper: ObjectMapper
-
-
-    @BeforeEach
-    fun createMockMvc() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build()
-    }
 
     @BeforeAll
     fun createTestUser() {

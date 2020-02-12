@@ -8,34 +8,24 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.web.WebAppConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.context.WebApplicationContext
 import pl.starchasers.mdpages.user.data.dto.RegisterUserDTO
 import success
 
 @SpringBootTest
-@WebAppConfiguration
+@AutoConfigureMockMvc
 internal class UserControllerTest(
-    @Autowired private val webApplicationContext: WebApplicationContext,
+    @Autowired private val mockMvc: MockMvc,
     @Autowired private val mapper: ObjectMapper,
     @Autowired private val userService: UserService
 ) {
-
-    private lateinit var mockMvc: MockMvc
-
-
-    @BeforeEach
-    fun createMockMvc() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build()
-    }
-
     @Nested
     inner class RegisterUser() {
 
@@ -51,9 +41,9 @@ internal class UserControllerTest(
                 content = mapper.writeValueAsString(RegisterUserDTO("testUser", "passw0rd", "asd@asd.pl"))
             }.andDo { print() }.let { success(it) }
 
-            userService.getUserByUsername("testUser").let {
-                assertEquals(it.username, "testUser")
-                assertEquals(it.email, "asd@asd.pl")
+            userService.getUserByUsername("testUser").run {
+                assertEquals(username, "testUser")
+                assertEquals(email, "asd@asd.pl")
             }
         }
 

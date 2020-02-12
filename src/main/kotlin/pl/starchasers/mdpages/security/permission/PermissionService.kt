@@ -31,7 +31,7 @@ class PermissionService(
     fun hasScopePermission(scopePath: String, permissionType: PermissionType, userId: Long): Boolean =
         hasScopePermission(scopePath, permissionType, userService.getUser(userId))
 
-    fun giveGlobalPermission(permissionType: PermissionType, user: User): Permission =
+    fun grantGlobalPermission(permissionType: PermissionType, user: User): Permission =
         Permission(
             contentService.getDefaultScope(),
             permissionType,
