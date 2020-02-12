@@ -1,5 +1,7 @@
-import org.hamcrest.CoreMatchers
-import org.hamcrest.CoreMatchers.*
+package pl.starchasers.mdpages
+
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.notNullValue
 import org.springframework.test.web.servlet.ResultActionsDsl
 
 fun errorThrown(result: ResultActionsDsl) = result.andExpect {

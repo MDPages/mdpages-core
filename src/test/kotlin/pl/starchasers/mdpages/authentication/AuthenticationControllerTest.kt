@@ -1,22 +1,21 @@
 package pl.starchasers.mdpages.authentication
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import errorThrown
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.notNullValue
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.test.context.web.WebAppConfiguration
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.web.context.WebApplicationContext
-import pl.starchasers.mdpages.user.UserService
-import pl.starchasers.mdpages.authentication.dto.LoginDTO
-import org.hamcrest.CoreMatchers.*
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.web.servlet.*
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.post
+import pl.starchasers.mdpages.authentication.dto.LoginDTO
 import pl.starchasers.mdpages.authentication.dto.TokenDTO
-import success
+import pl.starchasers.mdpages.errorThrown
+import pl.starchasers.mdpages.success
+import pl.starchasers.mdpages.user.UserService
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
