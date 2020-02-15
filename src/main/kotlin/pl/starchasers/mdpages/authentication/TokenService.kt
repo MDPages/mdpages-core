@@ -14,9 +14,27 @@ import java.util.*
 
 private const val TOKEN_ID_KEY = "tokenId"
 
-//TODO exception handling
+interface TokenService {
+    fun issueRefreshToken(user: User): String
+
+    fun refreshRefreshToken(oldRefreshToken: String): String
+
+    fun issueAccessToken(refreshToken: String): String
+
+    fun verifyRefreshToken(token: String, user: User)
+
+    fun parseToken(token: String): Claims
+
+    fun invalidateUser(user: User)
+
+    fun invalidateRefreshToken(refreshToken: String)
+}
+
 @Service
-class TokenService(private val refreshTokenRepository: RefreshTokenRepository, private val userService: UserService) {
+class TokenServiceImpl(
+    private val refreshTokenRepository: RefreshTokenRepository,
+    private val userService: UserService
+) : TokenService {
 
     @Value("\${jwt.secret}")
     private val secret = ""
@@ -24,7 +42,7 @@ class TokenService(private val refreshTokenRepository: RefreshTokenRepository, p
     private val refreshTokenValidTime: Long = 7 * 24 * 60 * 60 * 1000
     private val accessTokenValidTime: Long = 15 * 60 * 1000
 
-    fun issueRefreshToken(user: User): String {
+    override fun issueRefreshToken(user: User): String {
         val claims = Jwts.claims().setSubject(user.id.toString())
         val now = Date()
         val tokenId = UUID.randomUUID().toString()
@@ -48,7 +66,7 @@ class TokenService(private val refreshTokenRepository: RefreshTokenRepository, p
             .compact()
     }
 
-    fun refreshRefreshToken(oldRefreshToken: String): String {
+    override fun refreshRefreshToken(oldRefreshToken: String): String {
         val oldClaims = parseToken(oldRefreshToken)
         val user = userService.getUser(oldClaims.subject.toLong())
 
@@ -58,7 +76,7 @@ class TokenService(private val refreshTokenRepository: RefreshTokenRepository, p
     }
 
 
-    fun issueAccessToken(refreshToken: String): String {
+    override fun issueAccessToken(refreshToken: String): String {
         val refreshTokenClaims = parseToken(refreshToken)
         val user = userService.getUser(refreshTokenClaims.subject.toLong())
 
@@ -77,11 +95,11 @@ class TokenService(private val refreshTokenRepository: RefreshTokenRepository, p
 
     }
 
-    fun verifyRefreshToken(token: String, user: User) {
+    override fun verifyRefreshToken(token: String, user: User) {
         refreshTokenRepository.findFirstByTokenAndUser(token, user) ?: throw InvalidTokenException()
     }
 
-    fun parseToken(token: String): Claims {
+    override fun parseToken(token: String): Claims {
         try {
             return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).body
         } catch (e: Exception) {
@@ -89,12 +107,13 @@ class TokenService(private val refreshTokenRepository: RefreshTokenRepository, p
         }
     }
 
-    fun invalidateUser(user: User) {
+    @Transactional
+    override fun invalidateUser(user: User) {
         refreshTokenRepository.deleteAllByUser(user)
     }
 
     @Transactional
-    fun invalidateRefreshToken(refreshToken: String) {
+    override fun invalidateRefreshToken(refreshToken: String) {
         val claims = parseToken(refreshToken)
         refreshTokenRepository.deleteAllByToken(claims[TOKEN_ID_KEY] as String)
     }

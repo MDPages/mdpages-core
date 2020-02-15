@@ -1,5 +1,6 @@
 package pl.starchasers.mdpages.user
 
+import org.aspectj.weaver.ast.Not
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,37 +16,67 @@ const val MAX_USERNAME_LENGTH = 32
 const val MIN_PASSWORD_LENGTH = 8
 const val MAX_PASSWORD_LENGTH = 64
 
+interface UserService {
+    /**
+     * @throws UserNotFoundException
+     */
+    fun getUser(id: Long): User
+
+    fun findUser(id: Long): User?
+
+    /**
+     * @throws UserNotFoundException
+     */
+    fun getUserByUsername(username: String): User
+
+    fun findUserByUsername(username: String): User?
+
+    /**
+     * @throws UserNotFoundException
+     */
+    fun validateCredentials(username: String, password: String): Boolean
+
+    fun getUserFromCredentials(username: String, password: String): User
+
+    fun createUser(username: String, password: String)
+
+    fun registerUser(username: String, password: String, email: String)
+
+    fun deleteUser(username: String)
+}
+
 @Service
-class UserService(private val userRepository: UserRepository, private val passwordEncoder: PasswordEncoder) {
+class UserServiceImpl(private val userRepository: UserRepository, private val passwordEncoder: PasswordEncoder) :
+    UserService {
 
     /**
      * @throws UserNotFoundException
      */
-    fun getUser(id: Long): User = userRepository.getFirstById(id) ?: throw UserNotFoundException()
+    override fun getUser(id: Long): User = userRepository.getFirstById(id) ?: throw UserNotFoundException()
 
 
-    fun findUser(id: Long): User? = userRepository.getFirstById(id)
+    override fun findUser(id: Long): User? = userRepository.getFirstById(id)
 
     /**
      * @throws UserNotFoundException
      */
-    fun getUserByUsername(username: String): User =
+    override fun getUserByUsername(username: String): User =
         userRepository.getFirstByUsername(username) ?: throw UserNotFoundException()
 
-    fun findUserByUsername(username: String): User? = userRepository.getFirstByUsername(username)
+    override fun findUserByUsername(username: String): User? = userRepository.getFirstByUsername(username)
 
     /**
      * @throws UserNotFoundException
      */
-    fun validateCredentials(username: String, password: String): Boolean =
+    override fun validateCredentials(username: String, password: String): Boolean =
         passwordEncoder.matches(password, getUserByUsername(username).password)
 
-    fun getUserFromCredentials(username: String, password: String): User =
+    override fun getUserFromCredentials(username: String, password: String): User =
         getUserByUsername(username).takeIf { passwordEncoder.matches(password, it.password) }
             ?: throw UnauthorizedException()
 
 
-    fun createUser(username: String, password: String) {
+    override fun createUser(username: String, password: String) {
         validateUsername(username)
         validatePassword(password)
         if (findUserByUsername(username) != null) throw UsernameTakenException()
@@ -59,7 +90,7 @@ class UserService(private val userRepository: UserRepository, private val passwo
         userRepository.save(user)
     }
 
-    fun registerUser(username: String, password: String, email: String) {
+    override fun registerUser(username: String, password: String, email: String) {
         validateUsername(username)
         validatePassword(password)
 
@@ -70,16 +101,16 @@ class UserService(private val userRepository: UserRepository, private val passwo
         userRepository.save(user)
     }
 
+    @Transactional
+    override fun deleteUser(username: String) {
+        userRepository.deleteAllByUsername(username)
+    }
+
     private fun validateUsername(username: String) {
         if (!username.all { it.isLetterOrDigit() } || username.length < MIN_USERNAME_LENGTH || username.length > MAX_USERNAME_LENGTH) throw MalformedUsernameException()
     }
 
     private fun validatePassword(password: String) {
         if (password.length < MIN_PASSWORD_LENGTH || password.length > MAX_PASSWORD_LENGTH) throw MalformedPasswordException()
-    }
-
-    @Transactional
-    fun deleteUser(username: String) {
-        userRepository.deleteAllByUsername(username)
     }
 }

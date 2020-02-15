@@ -1,5 +1,10 @@
 package pl.starchasers.mdpages.configutation
 
-class ConfigurationService(){
+import org.springframework.stereotype.Service
+
+interface ConfigurationService {}
+
+@Service
+class ConfigurationServiceImpl() : ConfigurationService {
 
 }
