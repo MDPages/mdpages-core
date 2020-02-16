@@ -4,5 +4,7 @@ open class BasicErrorResponseDTO(
     /**
      * Present only when error occured
      */
-    val errorMessage: String = "Error occurred!"
-) : BasicResponseDTO(false)
+    val errorMessage: String? = "Error occurred!",
+
+    val success: Boolean = false
+)

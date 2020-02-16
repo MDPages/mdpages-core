@@ -19,7 +19,6 @@ fun MockMvcData.isError(expectedStatus: HttpStatus) {
     responseJsonPath("$.errorMessage").isNotEmpty()
 }
 
-
 fun errorThrown(result: ResultActionsDsl) = result.andExpect {
     status { is4xxClientError }
     jsonPath("$.errorMessage", notNullValue())

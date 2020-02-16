@@ -35,7 +35,6 @@ internal class UserControllerTest(
         fun `Given valid data, should return success and register user`() {
             mockMvc.post(
                 path = registerRequestPath,
-                docsIdentifier = "test1",
                 body = mapper.writeValueAsString(RegisterUserDTO("testUser", "passw0rd", "asd@asd.pl")),
                 headers = HttpHeaders().contentTypeJson()
             ) {

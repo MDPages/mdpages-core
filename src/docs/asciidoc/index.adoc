@@ -1,3 +1,4 @@
 :toc: left
 
 include::{snippets}/post-api-user-register/auto-section.adoc[]
+include::{snippets}/post-api-auth-login/auto-section.adoc[]
