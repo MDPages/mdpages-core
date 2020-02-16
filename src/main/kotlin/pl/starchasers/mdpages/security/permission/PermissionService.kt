@@ -7,40 +7,65 @@ import pl.starchasers.mdpages.content.data.Folder
 import pl.starchasers.mdpages.user.UserService
 import pl.starchasers.mdpages.user.data.User
 
+interface PermissionService {
+    fun hasGlobalPermission(permissionType: PermissionType, userId: Long): Boolean
+
+    fun hasGlobalPermission(permissionType: PermissionType, user: User): Boolean
+
+    fun hasGlobalPermission(permissionType: PermissionType, userId: String): Boolean
+
+    fun hasScopePermission(scopePath: String, permissionType: PermissionType, userId: Long): Boolean
+
+    fun hasScopePermission(scopePath: String, permissionType: PermissionType, user: User): Boolean
+
+    fun hasScopePermission(scopePath: String, permissionType: PermissionType, userId: String): Boolean
+
+    fun grantGlobalPermission(permissionType: PermissionType, user: User): Permission
+
+    fun grantGlobalPermission(permissionType: PermissionType, permissionTarget: PermissionTarget): Permission
+
+    fun grantScopePermission(scope: Folder, permissionType: PermissionType, user: User): Permission
+
+    fun grantScopePermission(
+        scope: Folder,
+        permissionType: PermissionType,
+        permissionTarget: PermissionTarget
+    ): Permission
+}
+
 @Service
-class PermissionService(
+class PermissionServiceImpl(
     private val permissionRepository: PermissionRepository,
-    private val userService: UserService,
     private val contentService: ContentService,
     private val permissionCacheService: PermissionCacheService
-) {
+) : PermissionService {
 
-    fun hasGlobalPermission(permissionType: PermissionType, userId: Long): Boolean =
+    override fun hasGlobalPermission(permissionType: PermissionType, userId: Long): Boolean =
         permissionCacheService.hasPermission(contentService.getDefaultScope(), userId, permissionType)
                 || permissionCacheService.hasPermissionAnonymous(contentService.getDefaultScope(), permissionType)
                 || permissionCacheService.hasPermissionAuthenticated(contentService.getDefaultScope(), permissionType)
 
 
-    fun hasGlobalPermission(permissionType: PermissionType, user: User): Boolean =
+    override fun hasGlobalPermission(permissionType: PermissionType, user: User): Boolean =
         hasGlobalPermission(permissionType, user.id)
 
-    fun hasGlobalPermission(permissionType: PermissionType, userId: String): Boolean =
+    override fun hasGlobalPermission(permissionType: PermissionType, userId: String): Boolean =
         userId.toLongOrNull()?.let { hasGlobalPermission(permissionType, it) }
             ?: permissionCacheService.hasPermissionAnonymous(contentService.getDefaultScope(), permissionType)
 
-    fun hasScopePermission(scopePath: String, permissionType: PermissionType, userId: Long): Boolean =
+    override fun hasScopePermission(scopePath: String, permissionType: PermissionType, userId: Long): Boolean =
         permissionCacheService.hasPermissionAnonymous(scopePath, permissionType)
                 || permissionCacheService.hasPermissionAuthenticated(scopePath, permissionType)
                 || permissionCacheService.hasPermission(scopePath, userId, permissionType)
 
-    fun hasScopePermission(scopePath: String, permissionType: PermissionType, user: User): Boolean =
+    override fun hasScopePermission(scopePath: String, permissionType: PermissionType, user: User): Boolean =
         hasScopePermission(scopePath, permissionType, user.id)
 
-    fun hasScopePermission(scopePath: String, permissionType: PermissionType, userId: String) =
+    override fun hasScopePermission(scopePath: String, permissionType: PermissionType, userId: String): Boolean =
         userId.toLongOrNull()?.let { hasScopePermission(scopePath, permissionType, it) }
             ?: permissionCacheService.hasPermissionAnonymous(scopePath, permissionType)
 
-    fun grantGlobalPermission(permissionType: PermissionType, user: User): Permission =
+    override fun grantGlobalPermission(permissionType: PermissionType, user: User): Permission =
         Permission(
             contentService.getDefaultScope(),
             permissionType,
@@ -48,7 +73,7 @@ class PermissionService(
             user
         ).let { permissionRepository.save(it) }
 
-    fun grantGlobalPermission(permissionType: PermissionType, permissionTarget: PermissionTarget): Permission =
+    override fun grantGlobalPermission(permissionType: PermissionType, permissionTarget: PermissionTarget): Permission =
         Permission(
             contentService.getDefaultScope(),
             permissionType,
@@ -56,7 +81,7 @@ class PermissionService(
             null
         ).let { permissionRepository.save(it) }
 
-    fun grantScopedPermission(scope: Folder, permissionType: PermissionType, user: User): Permission =
+    override fun grantScopePermission(scope: Folder, permissionType: PermissionType, user: User): Permission =
         Permission(
             scope,
             permissionType,
@@ -64,7 +89,7 @@ class PermissionService(
             user
         ).let { permissionRepository.save(it) }
 
-    fun grantScopedPermission(
+    override fun grantScopePermission(
         scope: Folder,
         permissionType: PermissionType,
         permissionTarget: PermissionTarget
