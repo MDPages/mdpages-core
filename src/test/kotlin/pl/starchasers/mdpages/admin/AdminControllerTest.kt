@@ -9,11 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
-import pl.starchasers.mdpages.MockMvcTestBase
+import pl.starchasers.mdpages.*
 import pl.starchasers.mdpages.admin.data.CreateUserDTO
 import pl.starchasers.mdpages.authentication.TokenService
-import pl.starchasers.mdpages.isError
-import pl.starchasers.mdpages.isSuccess
 import pl.starchasers.mdpages.security.permission.PermissionService
 import pl.starchasers.mdpages.security.permission.PermissionType
 import pl.starchasers.mdpages.user.UserService
@@ -46,6 +44,7 @@ internal class AdminControllerTest(
         tokenService.issueRefreshToken(user).let { refreshToken -> tokenService.issueAccessToken(refreshToken) }
 
 
+    @OrderTests
     @Nested
     inner class CreateUser {
 
@@ -56,6 +55,7 @@ internal class AdminControllerTest(
             userService.deleteUser("createdUser")
         }
 
+        @DocumentResponse
         @Test
         fun `Given valid data, should return success and create user`() {
             mockMvc.post(

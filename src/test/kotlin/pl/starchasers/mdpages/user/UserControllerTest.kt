@@ -7,12 +7,11 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import pl.starchasers.mdpages.MockMvcTestBase
-import pl.starchasers.mdpages.isError
-import pl.starchasers.mdpages.isSuccess
+import pl.starchasers.mdpages.*
 import pl.starchasers.mdpages.user.data.dto.RegisterUserDTO
 
 
@@ -20,6 +19,7 @@ internal class UserControllerTest(
     @Autowired private val userService: UserService
 ) : MockMvcTestBase() {
 
+    @OrderTests
     @Nested
     inner class RegisterUser() {
 
@@ -31,6 +31,7 @@ internal class UserControllerTest(
             userService.deleteUser("testUser")
         }
 
+        @DocumentResponse
         @Test
         fun `Given valid data, should return success and register user`() {
             mockMvc.post(

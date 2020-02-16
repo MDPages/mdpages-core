@@ -1,10 +1,8 @@
 package pl.starchasers.mdpages
 
 import no.skatteetaten.aurora.mockmvc.extensions.*
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.CoreMatchers.notNullValue
+import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.http.HttpStatus
-import org.springframework.test.web.servlet.ResultActionsDsl
 
 fun MockMvcData.isSuccess() {
     printResponseBody()
@@ -19,13 +17,18 @@ fun MockMvcData.isError(expectedStatus: HttpStatus) {
     responseJsonPath("$.errorMessage").isNotEmpty()
 }
 
-fun errorThrown(result: ResultActionsDsl) = result.andExpect {
-    status { is4xxClientError }
-    jsonPath("$.errorMessage", notNullValue())
-    jsonPath("$.success", equalTo(false))
-}
+/**
+ * Response from this test will be included as "Example Response" when generating REST documentation.
+ * If none method is annotated, one is chosen at random.
+ */
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class DocumentResponse
 
-fun success(result: ResultActionsDsl) = result.andExpect {
-    status { isOk }
-    jsonPath("$.success", equalTo(true))
-}
+/**
+ * Sorts test execution, so those annotated with DocumentResponse will be executed last
+ */
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+@TestMethodOrder(AnnotationMethodOrderer::class)
+annotation class OrderTests

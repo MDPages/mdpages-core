@@ -9,11 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
-import pl.starchasers.mdpages.MockMvcTestBase
+import pl.starchasers.mdpages.*
 import pl.starchasers.mdpages.authentication.dto.LoginDTO
 import pl.starchasers.mdpages.authentication.dto.TokenDTO
-import pl.starchasers.mdpages.isError
-import pl.starchasers.mdpages.isSuccess
 import pl.starchasers.mdpages.user.UserService
 
 
@@ -29,11 +27,12 @@ internal class AuthenticationControllerTest(
         userService.createUser("testUser", "passw0rd")
     }
 
+    @OrderTests
     @Nested
-    @DisplayName("/api/auth/login endpoint")
     inner class Login() {
         private val loginRequestPath = Path("/api/auth/login")
 
+        @DocumentResponse
         @Test
         fun `Given valid data, should return refresh token`() {
             mockMvc.post(
@@ -72,6 +71,7 @@ internal class AuthenticationControllerTest(
         }
     }
 
+    @OrderTests
     @Nested
     inner class GetAccessToken {
 
@@ -88,6 +88,7 @@ internal class AuthenticationControllerTest(
             tokenService.invalidateRefreshToken(refreshToken)
         }
 
+        @DocumentResponse
         @Test
         fun `Given valid refresh token, should return access token`() {
             mockMvc.post(
@@ -116,6 +117,7 @@ internal class AuthenticationControllerTest(
 
     }
 
+    @OrderTests
     @Nested
     inner class RefreshToken {
         private var refreshToken = ""
@@ -132,6 +134,7 @@ internal class AuthenticationControllerTest(
         }
 
 
+        @DocumentResponse
         @Test
         fun `Given valid refresh token, should return new refresh token`() {
             mockMvc.post(
