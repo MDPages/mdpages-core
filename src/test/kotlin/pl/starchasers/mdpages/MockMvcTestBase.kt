@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
+import javax.servlet.Filter
 
 @ExtendWith(RestDocumentationExtension::class)
 @SpringBootTest
@@ -29,10 +30,14 @@ abstract class MockMvcTestBase {
 
     protected lateinit var mockMvc: MockMvc
 
+
+    @Autowired
+    private lateinit var springSecurityFilterChain: Filter
+
     @BeforeEach
     fun setUp(restDocumentation: RestDocumentationContextProvider) {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-//            .addFilters<DefaultMockMvcBuilder>(springSecurityFilterChain)
+            .addFilters<DefaultMockMvcBuilder>(springSecurityFilterChain)
             .alwaysDo<DefaultMockMvcBuilder>(JacksonResultHandlers.prepareJackson(mapper))
 //            .alwaysDo<DefaultMockMvcBuilder>(commonDocumentation())
             .apply<DefaultMockMvcBuilder>(
