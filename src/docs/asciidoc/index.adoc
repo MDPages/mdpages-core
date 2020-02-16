@@ -1,4 +1,14 @@
 :toc: left
 
-include::{snippets}/post-api-user-register/auto-section.adoc[]
-include::{snippets}/post-api-auth-login/auto-section.adoc[]
+== Authentication Controller
+include::{snippets}/Login/auto-section.adoc[]
+---
+include::{snippets}/GetAccessToken/auto-section.adoc[]
+---
+include::{snippets}/RefreshToken/auto-section.adoc[]
+---
+== User Controller
+include::{snippets}/RegisterUser/auto-section.adoc[]
+
+== Admin Controller
+include::{snippets}/CreateUser/auto-section.adoc[]

@@ -2,7 +2,10 @@ package pl.starchasers.mdpages
 
 import capital.scalable.restdocs.AutoDocumentation
 import capital.scalable.restdocs.jackson.JacksonResultHandlers
+import capital.scalable.restdocs.response.ResponseModifyingPreprocessors.limitJsonArrayLength
+import capital.scalable.restdocs.response.ResponseModifyingPreprocessors.replaceBinaryContent
 import com.fasterxml.jackson.databind.ObjectMapper
+import no.skatteetaten.aurora.mockmvc.extensions.TestObjectMapperConfigurer.objectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,6 +15,11 @@ import org.springframework.restdocs.RestDocumentationExtension
 import org.springframework.restdocs.cli.CliDocumentation
 import org.springframework.restdocs.http.HttpDocumentation
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation
+import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
+import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler
+import org.springframework.restdocs.operation.preprocess.OperationResponsePreprocessor
+import org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse
+import org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint
 import org.springframework.test.context.web.WebAppConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
@@ -39,7 +47,7 @@ abstract class MockMvcTestBase {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
             .addFilters<DefaultMockMvcBuilder>(springSecurityFilterChain)
             .alwaysDo<DefaultMockMvcBuilder>(JacksonResultHandlers.prepareJackson(mapper))
-//            .alwaysDo<DefaultMockMvcBuilder>(commonDocumentation())
+            .alwaysDo<DefaultMockMvcBuilder>(commonDocumentation())
             .apply<DefaultMockMvcBuilder>(
                 MockMvcRestDocumentation.documentationConfiguration(restDocumentation)
                     .uris()
@@ -61,5 +69,16 @@ abstract class MockMvcTestBase {
                     )
             )
             .build()
+    }
+
+    protected fun commonDocumentation(): RestDocumentationResultHandler {
+        return document("{ClassName}", commonResponsePreprocessor())
+    }
+
+    protected fun commonResponsePreprocessor(): OperationResponsePreprocessor {
+        return preprocessResponse(
+            replaceBinaryContent(), limitJsonArrayLength(objectMapper),
+            prettyPrint()
+        )
     }
 }
