@@ -15,9 +15,12 @@ class Folder(
 
     name: String,
 
-    parent: Folder?
+    parent: Folder?,
+
+    scope: Folder? = null
 ) : MdObject(
     name = name,
     parent = parent,
-    objectType = ObjectType.FOLDER
+    objectType = ObjectType.FOLDER,
+    scope = scope
 )

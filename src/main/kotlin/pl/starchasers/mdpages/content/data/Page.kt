@@ -15,6 +15,10 @@ class Page(
     @Column(columnDefinition = "DATETIME", nullable = false, unique = false)
     val lastEdited: LocalDateTime,
 
+    @Column(nullable = false)
+    var deleted: Boolean = false,
+
     name: String,
-    parent: Folder?
-) : MdObject(name = name, parent = parent, objectType = ObjectType.PAGE)
+    parent: Folder?,
+    scope: Folder? = null
+) : MdObject(name = name, parent = parent, objectType = ObjectType.PAGE, scope = scope)

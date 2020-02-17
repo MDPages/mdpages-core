@@ -14,7 +14,7 @@ interface PermissionService {
 
     fun hasGlobalPermission(permissionType: PermissionType, userId: String): Boolean
 
-    fun hasScopePermission(scopePath: String, permissionType: PermissionType, userId: Long): Boolean
+    fun hasScopePermission(scopePath: String, permissionType: PermissionType, userId: Long?): Boolean
 
     fun hasScopePermission(scopePath: String, permissionType: PermissionType, user: User): Boolean
 
@@ -53,13 +53,14 @@ class PermissionServiceImpl(
         userId.toLongOrNull()?.let { hasGlobalPermission(permissionType, it) }
             ?: permissionCacheService.hasPermissionAnonymous(contentService.getDefaultScope(), permissionType)
 
-    override fun hasScopePermission(scopePath: String, permissionType: PermissionType, userId: Long): Boolean =
+    override fun hasScopePermission(scopePath: String, permissionType: PermissionType, userId: Long?): Boolean =
         permissionCacheService.hasPermissionAnonymous(scopePath, permissionType)
                 || permissionCacheService.hasPermissionAuthenticated(scopePath, permissionType)
-                || permissionCacheService.hasPermission(scopePath, userId, permissionType)
+                || userId?.let { permissionCacheService.hasPermission(scopePath, userId, permissionType) } ?: false
 
     override fun hasScopePermission(scopePath: String, permissionType: PermissionType, user: User): Boolean =
         hasScopePermission(scopePath, permissionType, user.id)
+
 
     override fun hasScopePermission(scopePath: String, permissionType: PermissionType, userId: String): Boolean =
         userId.toLongOrNull()?.let { hasScopePermission(scopePath, permissionType, it) }
