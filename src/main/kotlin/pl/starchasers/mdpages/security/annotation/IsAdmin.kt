@@ -1,6 +1,5 @@
 package pl.starchasers.mdpages.security.annotation
 
-import org.springframework.security.access.annotation.Secured
 import org.springframework.security.access.prepost.PreAuthorize
 
 @Target(AnnotationTarget.FUNCTION)
