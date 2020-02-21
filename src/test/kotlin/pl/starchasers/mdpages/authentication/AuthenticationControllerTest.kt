@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.transaction.annotation.Transactional
 import pl.starchasers.mdpages.*
 import pl.starchasers.mdpages.authentication.dto.LoginDTO
 import pl.starchasers.mdpages.authentication.dto.TokenDTO
@@ -22,14 +23,15 @@ internal class AuthenticationControllerTest(
     @Autowired private val tokenService: TokenService
 ) : MockMvcTestBase() {
 
-    @BeforeAll
+    @BeforeEach
     fun createTestUser() {
         userService.createUser("testUser", "passw0rd")
     }
 
+    @Transactional
     @OrderTests
     @Nested
-    inner class Login() {
+    inner class Login() :MockMvcTestBase(){
         private val loginRequestPath = Path("/api/auth/login")
 
         @DocumentResponse
@@ -43,7 +45,7 @@ internal class AuthenticationControllerTest(
                 isSuccess()
                 responseJsonPath("$.token").isNotEmpty()
             }
-
+            //TODO verify token in db
         }
 
         @Test
@@ -71,9 +73,10 @@ internal class AuthenticationControllerTest(
         }
     }
 
+    @Transactional
     @OrderTests
     @Nested
-    inner class GetAccessToken {
+    inner class GetAccessToken :MockMvcTestBase(){
 
         private var refreshToken = ""
         private val getAccessTokenRequestPath = Path("/api/auth/getAccessToken")
@@ -83,7 +86,6 @@ internal class AuthenticationControllerTest(
             refreshToken = tokenService.issueRefreshToken(userService.getUserByUsername("testUser"))
         }
 
-        @AfterEach
         fun removeTestRefreshToken() {
             tokenService.invalidateRefreshToken(refreshToken)
         }
@@ -117,9 +119,10 @@ internal class AuthenticationControllerTest(
 
     }
 
+    @Transactional
     @OrderTests
     @Nested
-    inner class RefreshToken {
+    inner class RefreshToken ():MockMvcTestBase(){
         private var refreshToken = ""
         private val refreshTokenRequestPath = Path("/api/auth/refreshToken")
 
@@ -128,7 +131,6 @@ internal class AuthenticationControllerTest(
             refreshToken = tokenService.issueRefreshToken(userService.getUserByUsername("testUser"))
         }
 
-        @AfterEach
         fun removeTestRefreshToken() {
             tokenService.invalidateRefreshToken(refreshToken)
         }
@@ -145,6 +147,7 @@ internal class AuthenticationControllerTest(
                 isSuccess()
                 responseJsonPath("$.token").isNotEmpty()
             }
+            //TODO verify token in db
         }
 
         @Test

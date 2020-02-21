@@ -18,4 +18,6 @@ interface FolderRepository : JpaRepository<Folder, Long> {
     """
     )
     fun findScopeByName(name: String): Folder?
+
+    fun findFirstById(id: Long): Folder?
 }

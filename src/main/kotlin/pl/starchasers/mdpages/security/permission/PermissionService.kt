@@ -6,6 +6,7 @@ import pl.starchasers.mdpages.content.ContentService
 import pl.starchasers.mdpages.content.data.Folder
 import pl.starchasers.mdpages.user.UserService
 import pl.starchasers.mdpages.user.data.User
+import javax.transaction.Transactional
 
 interface PermissionService {
     fun hasGlobalPermission(permissionType: PermissionType, userId: Long): Boolean
@@ -31,6 +32,8 @@ interface PermissionService {
         permissionType: PermissionType,
         permissionTarget: PermissionTarget
     ): Permission
+
+    fun purgeFolderPermissions(folder: Folder)
 }
 
 @Service
@@ -101,4 +104,9 @@ class PermissionServiceImpl(
             permissionTarget,
             null
         ).let { permissionRepository.save(it) }
+
+    @Transactional
+    override fun purgeFolderPermissions(folder: Folder) {
+        permissionRepository.deleteAllByScope(folder)
+    }
 }

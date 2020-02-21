@@ -29,19 +29,19 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
     implementation 'io.jsonwebtoken:jjwt:0.9.0'
-    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
-    implementation "org.springframework.boot:spring-boot-starter-security"
-    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:2.2.4.RELEASE"
+
+    implementation "org.springframework.boot:spring-boot-starter-security:2.2.4.RELEASE"
+    implementation "org.springframework.boot:spring-boot-starter-web:2.2.4.RELEASE"
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
     implementation "com.github.ben-manes.caffeine:caffeine:2.8.1"
 
 
-    testImplementation "org.springframework.boot:spring-boot-starter-test"  //{
-//        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-//    }
+    testImplementation ("org.springframework.boot:spring-boot-starter-test:2.2.4.RELEASE")  {
+        exclude group: "org.junit.vintage:junit-vintage-engine"
+    }
     testImplementation "org.springframework.security:spring-security-test"
-    testImplementation "org.junit.jupiter:junit-jupiter-engine"
     testImplementation group: 'no.skatteetaten.aurora', name: 'mockmvc-extensions-kotlin', version: '1.0.4'
     testImplementation "com.h2database:h2:1.4.200"
 

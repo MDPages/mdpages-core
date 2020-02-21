@@ -11,9 +11,9 @@ class CreateFolderDTO(
     val name: String,
 
     /**
-     * Id of the parent directory. When creating new root (scope) directory, this should be null or omitted
+     * Id of the parent directory
      */
-    val parent: Long?
+    val parent: Long
 ) : Securable {
-    override fun getObjectId(): Long = parent ?: -1
+    override fun getObjectId(): Long = parent
 }

@@ -5,4 +5,6 @@ import pl.starchasers.mdpages.content.data.MdObject
 
 interface ObjectRepository : JpaRepository<MdObject, Long> {
     fun findFirstById(id: Long): MdObject?
+
+    fun findFirstByFullPath(fullPath: String): MdObject?
 }

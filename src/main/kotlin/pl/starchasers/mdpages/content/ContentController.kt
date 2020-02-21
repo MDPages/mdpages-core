@@ -1,19 +1,20 @@
 package pl.starchasers.mdpages.content
 
-import org.springframework.context.annotation.Scope
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import pl.starchasers.mdpages.content.data.dto.CreateFolderDTO
-import pl.starchasers.mdpages.content.data.dto.FolderIdDTO
+import pl.starchasers.mdpages.content.data.dto.FolderIdResponseDTO
+import pl.starchasers.mdpages.security.annotation.PathScopeSecured
 import pl.starchasers.mdpages.security.annotation.ScopeSecured
-import pl.starchasers.mdpages.security.permission.PermissionType
-import pl.starchasers.mdpages.security.permission.PermissionType.*
+import pl.starchasers.mdpages.security.permission.PermissionType.READ
+import pl.starchasers.mdpages.security.permission.PermissionType.WRITE
 import pl.starchasers.mdpages.util.BasicResponseDTO
-import javax.servlet.http.HttpServletRequest
 
 @RestController
 @RequestMapping("/api/content/")
-class ContentController() {
+class ContentController(
+    val contentService: ContentService
+) {
 
     @ScopeSecured(READ)
     @GetMapping("/object/{objectId}")
@@ -22,15 +23,16 @@ class ContentController() {
     }
 
     @ScopeSecured(WRITE)
-    @PutMapping("/folders")
-    fun createFolder(@Validated @RequestBody createFolderDTO: CreateFolderDTO): FolderIdDTO {
-        TODO()
+    @PutMapping("/folder")
+    fun createFolder(@Validated @RequestBody createFolderDTO: CreateFolderDTO): FolderIdResponseDTO {
+        return FolderIdResponseDTO(contentService.createFolder(createFolderDTO.name, createFolderDTO.parent))
     }
 
-    @ScopeSecured(WRITE)
-    @DeleteMapping("/f/**")
-    fun deleteFolder(): BasicResponseDTO {
-        TODO()
+    @PathScopeSecured(WRITE, pathParameterName = "folderId")
+    @DeleteMapping("/folder/{folderId}")
+    fun deleteFolder(@PathVariable folderId: Long): BasicResponseDTO {
+        contentService.deleteFolder(folderId)
+        return BasicResponseDTO()
     }
 
     fun createPage() {
