@@ -194,18 +194,6 @@ internal class ContentControllerTest(
         }
 
         @Test
-        fun `Given not authenticated user, should return 403`() {
-            mockMvc.delete(
-                path = Path(deleteFolderRequestPath + testFolder.id),
-                headers = HttpHeaders().contentTypeJson()
-            ) {
-                isError(HttpStatus.FORBIDDEN)
-            }
-            flush()
-            assertEquals(1, contentService.getFolder(root.id).children.size)
-        }
-
-        @Test
         fun `Given scope root, should return 403`() {
             grantWritePermission(root)
             mockMvc.delete(
@@ -216,6 +204,18 @@ internal class ContentControllerTest(
             }
             flush()
             assertEquals(1,contentService.getFolder(root.id).children.size)
+        }
+
+        @Test
+        fun `Given not authenticated user, should return 403`() {
+            mockMvc.delete(
+                path = Path(deleteFolderRequestPath + testFolder.id),
+                headers = HttpHeaders().contentTypeJson()
+            ) {
+                isError(HttpStatus.FORBIDDEN)
+            }
+            flush()
+            assertEquals(1, contentService.getFolder(root.id).children.size)
         }
     }
 }

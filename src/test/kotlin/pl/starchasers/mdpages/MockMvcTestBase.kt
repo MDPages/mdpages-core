@@ -67,7 +67,7 @@ abstract class MockMvcTestBase {
                         HttpDocumentation.httpResponse(),
                         AutoDocumentation.requestFields(),
                         AutoDocumentation.responseFields(),
-//                        AutoDocumentation.pathParameters(),
+                        AutoDocumentation.pathParameters(),
                         AutoDocumentation.requestParameters(),
                         AutoDocumentation.description(),
                         AutoDocumentation.methodAndPath(),

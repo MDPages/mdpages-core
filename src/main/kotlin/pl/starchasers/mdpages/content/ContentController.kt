@@ -28,9 +28,12 @@ class ContentController(
         return FolderIdResponseDTO(contentService.createFolder(createFolderDTO.name, createFolderDTO.parent))
     }
 
+    /**
+     * @param folderId Id of the folder to delete
+     */
     @PathScopeSecured(WRITE, pathParameterName = "folderId")
     @DeleteMapping("/folder/{folderId}")
-    fun deleteFolder(@PathVariable folderId: Long): BasicResponseDTO {
+    fun deleteFolder(@PathVariable(name = "folderId") folderId: Long): BasicResponseDTO {
         contentService.deleteFolder(folderId)
         return BasicResponseDTO()
     }
