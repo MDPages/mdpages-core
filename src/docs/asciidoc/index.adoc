@@ -10,5 +10,10 @@ include::{snippets}/RefreshToken/auto-section.adoc[]
 == User Controller
 include::{snippets}/RegisterUser/auto-section.adoc[]
 
+== Content Controller
+include::{snippets}/CreateFolder/auto-section.adoc[]
+---
+include::{snippets}/DeleteFolder/auto-section.adoc[]
+
 == Admin Controller
 include::{snippets}/CreateUser/auto-section.adoc[]

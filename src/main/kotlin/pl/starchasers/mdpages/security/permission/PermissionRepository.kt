@@ -32,4 +32,8 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
         """
     )
     fun getGroupPermissions(scope: String, permissionTarget: PermissionTarget): Set<Permission>
+
+    fun deleteAllByScope(scope: Folder)
+
+    fun deleteAllByUser(user: User)
 }

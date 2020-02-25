@@ -1,10 +1,11 @@
 package pl.starchasers.mdpages.user
 
-import org.aspectj.weaver.ast.Not
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import pl.starchasers.mdpages.authentication.RefreshTokenRepository
 import pl.starchasers.mdpages.authentication.UnauthorizedException
+import pl.starchasers.mdpages.security.permission.PermissionRepository
 import pl.starchasers.mdpages.user.data.User
 import pl.starchasers.mdpages.user.exception.MalformedPasswordException
 import pl.starchasers.mdpages.user.exception.MalformedUsernameException
@@ -46,7 +47,12 @@ interface UserService {
 }
 
 @Service
-class UserServiceImpl(private val userRepository: UserRepository, private val passwordEncoder: PasswordEncoder) :
+class UserServiceImpl(
+    private val userRepository: UserRepository,
+    private val passwordEncoder: PasswordEncoder,
+    private val permissionRepository: PermissionRepository,
+    private val tokenRepository: RefreshTokenRepository
+) :
     UserService {
 
     /**
@@ -103,6 +109,10 @@ class UserServiceImpl(private val userRepository: UserRepository, private val pa
 
     @Transactional
     override fun deleteUser(username: String) {
+        findUserByUsername(username)?.let {
+            permissionRepository.deleteAllByUser(it)
+            tokenRepository.deleteAllByUser(it)
+        }
         userRepository.deleteAllByUsername(username)
     }
 

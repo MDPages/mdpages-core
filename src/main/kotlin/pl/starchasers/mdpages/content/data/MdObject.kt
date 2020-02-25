@@ -20,6 +20,9 @@ abstract class MdObject(
     @ManyToOne(fetch = FetchType.LAZY)
     var parent: Folder?,
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    var scope: Folder?,
+
     @Column(length = 2048, unique = true, nullable = false)
-    val fullPath: String = (parent?.fullPath ?: "") + "/" + name
+    var fullPath: String = (parent?.fullPath ?: "") + "/" + name //TODO what does this do exactly
 )

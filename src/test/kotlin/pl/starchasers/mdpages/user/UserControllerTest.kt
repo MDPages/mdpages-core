@@ -7,21 +7,24 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.transaction.annotation.Transactional
 import pl.starchasers.mdpages.*
 import pl.starchasers.mdpages.user.data.dto.RegisterUserDTO
 
-
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Transactional
 internal class UserControllerTest(
     @Autowired private val userService: UserService
 ) : MockMvcTestBase() {
 
+    @Transactional
     @OrderTests
     @Nested
-    inner class RegisterUser() {
+    inner class RegisterUser():MockMvcTestBase() {
 
         private val registerRequestPath = Path("/api/user/register")
 

@@ -1,7 +1,6 @@
 package pl.starchasers.mdpages.security.permission
 
 import pl.starchasers.mdpages.content.data.Folder
-import pl.starchasers.mdpages.content.data.MdObject
 import pl.starchasers.mdpages.user.data.User
 import javax.persistence.*
 

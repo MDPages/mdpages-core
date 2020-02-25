@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.transaction.annotation.Transactional
 import pl.starchasers.mdpages.*
 import pl.starchasers.mdpages.admin.data.CreateUserDTO
 import pl.starchasers.mdpages.authentication.TokenService
@@ -43,17 +44,14 @@ internal class AdminControllerTest(
     fun getAccessToken(user: User) =
         tokenService.issueRefreshToken(user).let { refreshToken -> tokenService.issueAccessToken(refreshToken) }
 
-
+    @Transactional
     @OrderTests
     @Nested
-    inner class CreateUser {
+    inner class CreateUser : MockMvcTestBase() {
 
         private val createUserRequestPath = Path("/api/admin/user")
 
-        @AfterEach
-        fun deleteTestUsers() {
-            userService.deleteUser("createdUser")
-        }
+
 
         @DocumentResponse
         @Test
@@ -76,6 +74,7 @@ internal class AdminControllerTest(
             ) {
                 isError(HttpStatus.BAD_REQUEST)
             }
+            //TODO verify user in db
         }
 
         @Test
