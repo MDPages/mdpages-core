@@ -2,7 +2,8 @@ package pl.starchasers.mdpages.content.data
 
 import pl.starchasers.mdpages.content.ObjectType
 import java.time.LocalDateTime
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
 
 @Entity
 class Page(

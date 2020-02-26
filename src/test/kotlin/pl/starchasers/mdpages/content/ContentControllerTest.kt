@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.Mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -17,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional
 import pl.starchasers.mdpages.*
 import pl.starchasers.mdpages.authentication.TokenService
 import pl.starchasers.mdpages.content.data.Folder
+import pl.starchasers.mdpages.content.data.Page
 import pl.starchasers.mdpages.content.data.dto.CreateFolderDTO
+import pl.starchasers.mdpages.content.data.dto.CreatePageDTO
 import pl.starchasers.mdpages.content.data.dto.FolderIdResponseDTO
 import pl.starchasers.mdpages.security.permission.PermissionService
 import pl.starchasers.mdpages.security.permission.PermissionType
@@ -178,7 +181,7 @@ internal class ContentControllerTest(
                 isError(HttpStatus.FORBIDDEN)
             }
             flush()
-            assertEquals(1,contentService.getFolder(root.id).children.size)
+            assertEquals(1, contentService.getFolder(root.id).children.size)
         }
 
         @Test
@@ -190,7 +193,7 @@ internal class ContentControllerTest(
                 isError(HttpStatus.FORBIDDEN)
             }
             flush()
-            assertEquals(1,contentService.getFolder(root.id).children.size)
+            assertEquals(1, contentService.getFolder(root.id).children.size)
         }
 
         @Test
@@ -203,7 +206,7 @@ internal class ContentControllerTest(
                 isError(HttpStatus.FORBIDDEN)
             }
             flush()
-            assertEquals(1,contentService.getFolder(root.id).children.size)
+            assertEquals(1, contentService.getFolder(root.id).children.size)
         }
 
         @Test
@@ -216,6 +219,136 @@ internal class ContentControllerTest(
             }
             flush()
             assertEquals(1, contentService.getFolder(root.id).children.size)
+        }
+    }
+
+    @Transactional
+    @OrderTests
+    @Nested
+    inner class CreatePage() : MockMvcTestBase() {
+
+        private val createPageRequest = Path("/api/content/page")
+        private var rootFolderId: Long = -1
+
+        @BeforeEach
+        fun createTestFolder() {
+            val folder = Folder(true, mutableSetOf(), "root", null, null)
+            contentService.createFolder(folder)
+            rootFolderId = folder.id
+
+            grantWritePermission(folder)
+            flush()
+        }
+
+        @DocumentResponse
+        @Test
+        fun `Given valid data, should create page and return 200`() {
+            mockMvc.put(
+                path = createPageRequest,
+                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken()),
+                body = mapper.writeValueAsString(CreatePageDTO(rootFolderId, "testTitle", "testContent"))
+            ) {
+                isSuccess()
+                responseJsonPath("$.pageId").equalsLong(contentService.findFolder(rootFolderId)!!.children.elementAt(0).id)
+            }
+            flush()
+
+            (contentService.getFolder(rootFolderId).children.elementAt(0) as Page).apply {
+                assertEquals("testTitle", name)
+                assertEquals("testContent", content)
+            }
+        }
+
+        @Test
+        fun `Given duplicate page title, should return 400`() {
+            TODO()
+        }
+
+        @Test
+        fun `Given invalid parent folder name, should return 403`() {
+            TODO()
+
+        }
+
+        @Test
+        fun `Given missing WRITE permission, should return 403`() {
+            TODO()
+
+        }
+
+        @Test
+        fun `Given too long title, should return 400`() {
+            TODO()
+
+        }
+
+    }
+
+    @Transactional
+    @OrderTests
+    @Nested
+    inner class ModifyPage() : MockMvcTestBase() {
+
+        @DocumentResponse
+        @Test
+        fun `Given valid data, should update page and return 200`() {
+            TODO()
+
+        }
+
+        @Test
+        fun `Given duplicate page title, should return 400`() {
+            TODO()
+
+        }
+
+        @Test
+        fun `Given empty title, should return 400`() {
+            TODO()
+
+        }
+
+        @Test
+        fun `Given too long title, should return 400`() {
+            TODO()
+
+        }
+
+        @Test
+        fun `Given missing WRITE permission, should return 403`() {
+            TODO()
+
+        }
+
+        @Test
+        fun `Given invalid page id, should return 403`() {
+            TODO()
+
+        }
+    }
+
+    @Transactional
+    @OrderTests
+    @Nested
+    inner class DeletePage() : MockMvcTestBase() {
+
+        @DocumentResponse
+        @Test
+        fun `Given valid data, should delete page and return 200`() {
+            TODO()
+
+        }
+
+        @Test
+        fun `Given missing WRITE permission, should return 403`() {
+            TODO()
+
+        }
+
+        @Test
+        fun `Given invalid page id, should return 403`() {
+            TODO()
+
         }
     }
 }
