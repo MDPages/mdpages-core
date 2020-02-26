@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.skatteetaten.aurora.mockmvc.extensions.*
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -22,9 +22,11 @@ import pl.starchasers.mdpages.content.data.Page
 import pl.starchasers.mdpages.content.data.dto.CreateFolderDTO
 import pl.starchasers.mdpages.content.data.dto.CreatePageDTO
 import pl.starchasers.mdpages.content.data.dto.FolderIdResponseDTO
+import pl.starchasers.mdpages.content.data.dto.UpdatePageDTO
 import pl.starchasers.mdpages.security.permission.PermissionService
 import pl.starchasers.mdpages.security.permission.PermissionType
 import pl.starchasers.mdpages.user.UserService
+import java.time.LocalDateTime
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 internal class ContentControllerTest(
@@ -261,23 +263,60 @@ internal class ContentControllerTest(
 
         @Test
         fun `Given duplicate page title, should return 400`() {
+            contentService.createPage(
+                Page(
+                    "testContent2",
+                    LocalDateTime.now(),
+                    LocalDateTime.now(),
+                    false,
+                    "testTitle",
+                    contentService.getFolder(rootFolderId),
+                    contentService.getFolder(rootFolderId)
+                )
+            )
+            flush()
+            mockMvc.put(
+                path = createPageRequest,
+                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken()),
+                body = mapper.writeValueAsString(CreatePageDTO(rootFolderId, "testTitle", "testContent"))
+            ) {
+                isError(HttpStatus.BAD_REQUEST)
+            }
         }
 
         @Test
-        fun `Given invalid parent folder name, should return 403`() {
-            TODO()
-
+        fun `Given invalid parent folder id, should return 403`() {
+            mockMvc.put(
+                path = createPageRequest,
+                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken()),
+                body = mapper.writeValueAsString(CreatePageDTO(rootFolderId + 1, "testTitle", "testContent"))
+            ) {
+                isError(HttpStatus.FORBIDDEN)
+            }
+            flush()
+            assertEquals(0, contentService.getFolder(rootFolderId).children.size)
         }
 
         @Test
         fun `Given missing WRITE permission, should return 403`() {
-            TODO()
-
+            mockMvc.put(
+                path = createPageRequest,
+                headers = HttpHeaders().contentTypeJson(),
+                body = mapper.writeValueAsString(CreatePageDTO(rootFolderId, "testTitle", "testContent"))
+            ) {
+                isError(HttpStatus.FORBIDDEN)
+            }
         }
 
         @Test
         fun `Given too long title, should return 400`() {
-            TODO()
+            mockMvc.put(
+                path = createPageRequest,
+                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken()),
+                body = mapper.writeValueAsString(CreatePageDTO(rootFolderId, "a".repeat(65), "testContent"))
+            ) {
+                isError(HttpStatus.FORBIDDEN)
+            }
 
         }
 
@@ -288,66 +327,170 @@ internal class ContentControllerTest(
     @Nested
     inner class ModifyPage() : MockMvcTestBase() {
 
+        private var rootFolderId: Long = -1
+        private var testPageId: Long = -1
+
+        private fun getModifyPageRequest(id: Long): Path = Path("/api/content/page/$id")
+
+        @BeforeEach
+        fun setup() {
+            val rootFolder = Folder(true, mutableSetOf(), "root", null, null)
+            contentService.createFolder(rootFolder)
+            val page = contentService.createPage(rootFolder.id, "testTitle", "testContent")
+
+            rootFolderId = rootFolder.id
+            testPageId = page.id
+            grantWritePermission(rootFolder)
+        }
+
+        private fun verifyPageUnchanged() = contentService.getPage(testPageId).apply {
+            assertEquals("testTitle", name)
+            assertEquals("testContent", content)
+        }
+
         @DocumentResponse
         @Test
         fun `Given valid data, should update page and return 200`() {
-            TODO()
+            mockMvc.patch(
+                path = getModifyPageRequest(testPageId),
+                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken()),
+                body = mapper.writeValueAsString(UpdatePageDTO("testTitle2", "testContent2"))
+            ) {
+                isSuccess()
+            }
+            flush()
+
+            contentService.getPage(testPageId).apply {
+                assertEquals("testTile2", name)
+                assertEquals("testContent2", content)
+            }
 
         }
 
         @Test
         fun `Given duplicate page title, should return 400`() {
-            TODO()
-
+            contentService.createPage(rootFolderId, "testTitle2", "testContent3")
+            flush()
+            mockMvc.patch(
+                path = getModifyPageRequest(testPageId),
+                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken()),
+                body = mapper.writeValueAsString(UpdatePageDTO("testTitle2", "testContent2"))
+            ) {
+                isError(HttpStatus.BAD_REQUEST)
+            }
+            flush()
+            verifyPageUnchanged()
         }
 
         @Test
         fun `Given empty title, should return 400`() {
-            TODO()
-
+            mockMvc.patch(
+                path = getModifyPageRequest(testPageId),
+                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken()),
+                body = mapper.writeValueAsString(UpdatePageDTO("", "testContent2"))
+            ) {
+                isError(HttpStatus.BAD_REQUEST)
+            }
+            flush()
+            verifyPageUnchanged()
         }
 
         @Test
         fun `Given too long title, should return 400`() {
-            TODO()
-
+            mockMvc.patch(
+                path = getModifyPageRequest(testPageId),
+                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken()),
+                body = mapper.writeValueAsString(UpdatePageDTO("a".repeat(65), "testContent2"))
+            ) {
+                isError(HttpStatus.BAD_REQUEST)
+            }
+            flush()
+            verifyPageUnchanged()
         }
 
         @Test
         fun `Given missing WRITE permission, should return 403`() {
-            TODO()
-
+            mockMvc.patch(
+                path = getModifyPageRequest(testPageId),
+                headers = HttpHeaders().contentTypeJson(),
+                body = mapper.writeValueAsString(UpdatePageDTO("testTitle2", "testContent2"))
+            ) {
+                isError(HttpStatus.FORBIDDEN)
+            }
+            flush()
+            verifyPageUnchanged()
         }
 
         @Test
         fun `Given invalid page id, should return 403`() {
-            TODO()
-
-        }
-    }
-
-    @Transactional
-    @OrderTests
-    @Nested
-    inner class DeletePage() : MockMvcTestBase() {
-
-        @DocumentResponse
-        @Test
-        fun `Given valid data, should delete page and return 200`() {
-            TODO()
-
+            mockMvc.patch(
+                path = getModifyPageRequest(testPageId + 1),
+                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken()),
+                body = mapper.writeValueAsString(UpdatePageDTO("testTitle2", "testContent2"))
+            ) {
+                isError(HttpStatus.FORBIDDEN)
+            }
+            flush()
+            verifyPageUnchanged()
         }
 
-        @Test
-        fun `Given missing WRITE permission, should return 403`() {
-            TODO()
+        @Transactional
+        @OrderTests
+        @Nested
+        inner class DeletePage() : MockMvcTestBase() {
 
-        }
+            private var rootFolderId: Long = -1
+            private var testPageId: Long = -1
 
-        @Test
-        fun `Given invalid page id, should return 403`() {
-            TODO()
+            @BeforeEach()
+            fun setup() {
+                val folder = Folder(true, mutableSetOf(), "root", null, null)
+                contentService.createFolder(folder)
+                val page = contentService.createPage(folder.id, "testTitle", "testContent")
 
+                grantWritePermission(folder)
+                rootFolderId = folder.id
+                testPageId = page.id
+            }
+
+            private fun getDeletePageRequest(id: Long) = Path("/api/content/page/$id")
+
+            @DocumentResponse
+            @Test
+            fun `Given valid data, should delete page and return 200`() {
+                mockMvc.delete(
+                    path = getDeletePageRequest(testPageId),
+                    headers = HttpHeaders().authorization(getAccessToken())
+                ) {
+                    isSuccess()
+                }
+                flush()
+                assertNull(contentService.findPage(testPageId))
+            }
+
+            @Test
+            fun `Given missing WRITE permission, should return 403`() {
+                mockMvc.delete(
+                    path = getDeletePageRequest(testPageId),
+                    headers = HttpHeaders()
+                ) {
+                    isError(HttpStatus.FORBIDDEN)
+                }
+                flush()
+                assertNotNull(contentService.findPage(testPageId))
+            }
+
+            @Test
+            fun `Given invalid page id, should return 403`() {
+                mockMvc.delete(
+                    path = getDeletePageRequest(testPageId + 1),
+                    headers = HttpHeaders().authorization(getAccessToken())
+                ) {
+                    isError(HttpStatus.FORBIDDEN)
+                }
+                flush()
+                assertNotNull(contentService.findPage(testPageId))
+            }
         }
     }
 }
