@@ -4,20 +4,21 @@ import org.springframework.stereotype.Service
 import pl.starchasers.mdpages.authentication.UnauthorizedException
 import pl.starchasers.mdpages.content.data.Folder
 import pl.starchasers.mdpages.content.data.MdObject
-import pl.starchasers.mdpages.content.exception.FolderNotEmptyException
-import pl.starchasers.mdpages.content.exception.MalformedFolderNameException
-import pl.starchasers.mdpages.content.exception.ObjectDoesntExistException
-import pl.starchasers.mdpages.content.exception.ObjectNameTakenException
+import pl.starchasers.mdpages.content.data.Page
+import pl.starchasers.mdpages.content.exception.*
 import pl.starchasers.mdpages.content.repository.FolderRepository
 import pl.starchasers.mdpages.content.repository.ObjectRepository
 import pl.starchasers.mdpages.content.repository.PageRepository
 import pl.starchasers.mdpages.security.permission.PermissionRepository
 import pl.starchasers.mdpages.security.permission.PermissionService
+import java.time.LocalDateTime
 import javax.transaction.Transactional
 
 const val DEFAULT_SCOPE_PATH = "/Default"
 const val MINIMAL_FOLDER_NAME_LENGTH = 1
 const val MAXIMAL_FOLDER_NAME_LENGTH = 32
+const val MINIMAL_PAGE_NAME_LENGTH = 1
+const val MAXIMAL_PAGE_NAME_LENGTH = 64
 
 
 interface ContentService {
@@ -31,6 +32,14 @@ interface ContentService {
 
     fun deleteFolder(id: Long)
 
+    fun createPage(page: Page)
+
+    fun createPage(parentId: Long, title: String, content: String): Page
+
+    fun modifyPage(pageId: Long, title: String, newContent: String)
+
+    fun deletePage(pageId: Long)
+
     fun deleteObjectRecursive(obj: MdObject)
 
     fun findObject(id: Long): MdObject?
@@ -40,6 +49,10 @@ interface ContentService {
     fun getFolder(id: Long): Folder
 
     fun findFolder(id: Long): Folder?
+
+    fun getPage(id: Long): Page
+
+    fun findPage(id: Long): Page?
 }
 
 @Service
@@ -67,10 +80,13 @@ class ContentServiceImpl(
     override fun getObject(id: Long): MdObject =
         mdObjectRepository.findFirstById(id) ?: throw ObjectDoesntExistException()
 
-    @Transactional
     override fun getFolder(id: Long): Folder = folderRepository.findFirstById(id) ?: throw ObjectDoesntExistException()
 
     override fun findFolder(id: Long): Folder? = folderRepository.findFirstById(id)
+
+    override fun getPage(id: Long): Page = pageRepository.findFirstById(id) ?: throw ObjectDoesntExistException()
+
+    override fun findPage(id: Long): Page? = pageRepository.findFirstById(id)
 
     override fun createFolder(folder: Folder) {
         validateFolderName(folder.name)
@@ -83,6 +99,7 @@ class ContentServiceImpl(
         }
     }
 
+    @Transactional
     override fun createFolder(name: String, parentId: Long): Long {
         validateFolderName(name)
         val parentFolder: Folder = getObject(parentId) as Folder
@@ -109,12 +126,49 @@ class ContentServiceImpl(
     @Transactional
     override fun deleteFolder(id: Long) {
         val toDelete = getFolder(id)
-        if(toDelete.isRoot) throw UnauthorizedException()
+        if (toDelete.isRoot) throw UnauthorizedException()
         if (toDelete.children.isNotEmpty()) throw FolderNotEmptyException()
 
         permissionRepository.deleteAllByScope(toDelete)
         toDelete.parent?.children?.remove(toDelete)
         folderRepository.delete(toDelete)
+    }
+
+    @Transactional
+    override fun createPage(page: Page) {
+        validatePageName(page.name)
+
+        pageRepository.save(page)
+        page.parent?.children?.add(page) ?: throw MalformedPageException()
+        folderRepository.save(page.parent ?: throw MalformedPageException())
+    }
+
+    @Transactional
+    override fun createPage(parentId: Long, title: String, content: String): Page {
+        validatePageName(title)
+        val parent = getFolder(parentId)
+
+        val page = Page(content, LocalDateTime.now(), LocalDateTime.now(), false, title, parent, parent.scope ?: parent)
+        pageRepository.save(page)
+        parent.children.add(page)
+        return page
+    }
+
+    override fun modifyPage(pageId: Long, title: String, newContent: String) {
+        val page = getPage(pageId).apply {
+            name = title
+            content = newContent
+        }
+        pageRepository.save(page)
+    }
+
+    override fun deletePage(pageId: Long) {
+        val page = getPage(pageId)
+        pageRepository.delete(page)//TODO non destructive deletion
+    }
+
+    private fun validatePageName(name: String) {
+        if (name.length < MINIMAL_PAGE_NAME_LENGTH || name.length > MAXIMAL_PAGE_NAME_LENGTH) throw MalformedObjectNameException()
     }
 
     @Transactional

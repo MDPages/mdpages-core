@@ -41,14 +41,20 @@ class ContentController(
 
     @ScopeSecured(WRITE)
     @PutMapping("/page")
-    fun createPage(@RequestBody @Validated createPageDTO: CreatePageDTO): PageIdResponseDTO {
-        TODO()
-    }
+    fun createPage(@RequestBody @Validated createPageDTO: CreatePageDTO): PageIdResponseDTO = PageIdResponseDTO(
+        contentService.createPage(
+            createPageDTO.parentId,
+            createPageDTO.title,
+            createPageDTO.content
+        ).id
+    )
+
 
     @PathScopeSecured(WRITE, pathParameterName = "pageId")
     @PatchMapping("/page/{pageId}")
     fun updatePage(@PathVariable pageId: Long, @RequestBody @Validated updatePageDTO: UpdatePageDTO): BasicResponseDTO {
-        TODO()
+        contentService.modifyPage(pageId, updatePageDTO.title, updatePageDTO.content)
+        return BasicResponseDTO()
     }
 
     fun movePage() {
@@ -58,7 +64,8 @@ class ContentController(
     @PathScopeSecured(WRITE, pathParameterName = "pageId")
     @DeleteMapping("/page/{pageId}")
     fun deletePage(@PathVariable pageId: Long): BasicResponseDTO {
-        TODO()
+        contentService.deletePage(pageId)
+        return BasicResponseDTO()
     }
 
 

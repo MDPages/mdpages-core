@@ -12,7 +12,7 @@ abstract class MdObject(
     val id: Long = 0,
 
     @Column(length = 64, nullable = false)
-    val name: String,
+    var name: String,
 
     @Column(nullable = false)
     val objectType: ObjectType,
