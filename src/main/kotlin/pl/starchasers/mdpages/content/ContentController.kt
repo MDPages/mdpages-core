@@ -47,7 +47,9 @@ class ContentController(
         ).id
     )
 
-
+    /**
+     * @param pageId Id of modified page
+     */
     @PathScopeSecured(WRITE, pathParameterName = "pageId")
     @PatchMapping("/page/{pageId}")
     fun updatePage(@PathVariable(name = "pageId") pageId: Long, @RequestBody @Validated updatePageDTO: UpdatePageDTO): BasicResponseDTO {
@@ -59,12 +61,13 @@ class ContentController(
         //TODO implement
     }
 
+    /**
+     * @param pageId Id of page to delete
+     */
     @PathScopeSecured(WRITE, pathParameterName = "pageId")
     @DeleteMapping("/page/{pageId}")
     fun deletePage(@PathVariable(name = "pageId") pageId: Long): BasicResponseDTO {
         contentService.deletePage(pageId)
         return BasicResponseDTO()
     }
-
-
 }
