@@ -1,6 +1,5 @@
 package pl.starchasers.mdpages.content
 
-import org.springframework.context.annotation.Scope
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import pl.starchasers.mdpages.content.data.dto.*
@@ -9,7 +8,6 @@ import pl.starchasers.mdpages.security.annotation.ScopeSecured
 import pl.starchasers.mdpages.security.permission.PermissionType.READ
 import pl.starchasers.mdpages.security.permission.PermissionType.WRITE
 import pl.starchasers.mdpages.util.BasicResponseDTO
-import javax.websocket.server.PathParam
 
 @RestController
 @RequestMapping("/api/content/")
@@ -52,7 +50,7 @@ class ContentController(
 
     @PathScopeSecured(WRITE, pathParameterName = "pageId")
     @PatchMapping("/page/{pageId}")
-    fun updatePage(@PathVariable pageId: Long, @RequestBody @Validated updatePageDTO: UpdatePageDTO): BasicResponseDTO {
+    fun updatePage(@PathVariable(name = "pageId") pageId: Long, @RequestBody @Validated updatePageDTO: UpdatePageDTO): BasicResponseDTO {
         contentService.modifyPage(pageId, updatePageDTO.title, updatePageDTO.content)
         return BasicResponseDTO()
     }
@@ -63,7 +61,7 @@ class ContentController(
 
     @PathScopeSecured(WRITE, pathParameterName = "pageId")
     @DeleteMapping("/page/{pageId}")
-    fun deletePage(@PathVariable pageId: Long): BasicResponseDTO {
+    fun deletePage(@PathVariable(name = "pageId") pageId: Long): BasicResponseDTO {
         contentService.deletePage(pageId)
         return BasicResponseDTO()
     }

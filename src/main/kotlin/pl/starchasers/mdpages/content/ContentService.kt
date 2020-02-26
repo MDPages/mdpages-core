@@ -137,6 +137,7 @@ class ContentServiceImpl(
     @Transactional
     override fun createPage(page: Page) {
         validatePageName(page.name)
+        if (page.parent?.children?.any { it.name == page.name } == true) throw ObjectNameTakenException()
 
         pageRepository.save(page)
         page.parent?.children?.add(page) ?: throw MalformedPageException()
@@ -147,6 +148,7 @@ class ContentServiceImpl(
     override fun createPage(parentId: Long, title: String, content: String): Page {
         validatePageName(title)
         val parent = getFolder(parentId)
+        if (parent.children.any { it.name == title }) throw ObjectNameTakenException()
 
         val page = Page(content, LocalDateTime.now(), LocalDateTime.now(), false, title, parent, parent.scope ?: parent)
         pageRepository.save(page)
@@ -155,9 +157,13 @@ class ContentServiceImpl(
     }
 
     override fun modifyPage(pageId: Long, title: String, newContent: String) {
+        validatePageName(title)
+
         val page = getPage(pageId).apply {
+            if (parent?.children?.any { it.name == title } == true) throw ObjectNameTakenException()
             name = title
             content = newContent
+            fullPath = (parent?.fullPath ?: "") + "/$name"
         }
         pageRepository.save(page)
     }

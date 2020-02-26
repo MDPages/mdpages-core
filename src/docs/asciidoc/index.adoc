@@ -14,6 +14,12 @@ include::{snippets}/RegisterUser/auto-section.adoc[]
 include::{snippets}/CreateFolder/auto-section.adoc[]
 ---
 include::{snippets}/DeleteFolder/auto-section.adoc[]
+---
+include::{snippets}/CreatePage/auto-section.adoc[]
+---
+include::{snippets}/ModifyPage/auto-section.adoc[]
+---
+include::{snippets}/DeletePage/auto-section.adoc[]
 
 == Admin Controller
 include::{snippets}/CreateUser/auto-section.adoc[]

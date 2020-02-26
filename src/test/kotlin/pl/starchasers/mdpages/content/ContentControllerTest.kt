@@ -258,6 +258,7 @@ internal class ContentControllerTest(
             (contentService.getFolder(rootFolderId).children.elementAt(0) as Page).apply {
                 assertEquals("testTitle", name)
                 assertEquals("testContent", content)
+                assertEquals("/root/testTitle", fullPath)
             }
         }
 
@@ -315,7 +316,7 @@ internal class ContentControllerTest(
                 headers = HttpHeaders().contentTypeJson().authorization(getAccessToken()),
                 body = mapper.writeValueAsString(CreatePageDTO(rootFolderId, "a".repeat(65), "testContent"))
             ) {
-                isError(HttpStatus.FORBIDDEN)
+                isError(HttpStatus.BAD_REQUEST)
             }
 
         }
@@ -361,8 +362,9 @@ internal class ContentControllerTest(
             flush()
 
             contentService.getPage(testPageId).apply {
-                assertEquals("testTile2", name)
+                assertEquals("testTitle2", name)
                 assertEquals("testContent2", content)
+                assertEquals("/root/testTitle2", fullPath)
             }
 
         }
@@ -433,64 +435,64 @@ internal class ContentControllerTest(
             flush()
             verifyPageUnchanged()
         }
+    }
 
-        @Transactional
-        @OrderTests
-        @Nested
-        inner class DeletePage() : MockMvcTestBase() {
+    @Transactional
+    @OrderTests
+    @Nested
+    inner class DeletePage() : MockMvcTestBase() {
 
-            private var rootFolderId: Long = -1
-            private var testPageId: Long = -1
+        private var rootFolderId: Long = -1
+        private var testPageId: Long = -1
 
-            @BeforeEach()
-            fun setup() {
-                val folder = Folder(true, mutableSetOf(), "root", null, null)
-                contentService.createFolder(folder)
-                val page = contentService.createPage(folder.id, "testTitle", "testContent")
+        @BeforeEach()
+        fun setup() {
+            val folder = Folder(true, mutableSetOf(), "root", null, null)
+            contentService.createFolder(folder)
+            val page = contentService.createPage(folder.id, "testTitle", "testContent")
 
-                grantWritePermission(folder)
-                rootFolderId = folder.id
-                testPageId = page.id
+            grantWritePermission(folder)
+            rootFolderId = folder.id
+            testPageId = page.id
+        }
+
+        private fun getDeletePageRequest(id: Long) = Path("/api/content/page/$id")
+
+        @DocumentResponse
+        @Test
+        fun `Given valid data, should delete page and return 200`() {
+            mockMvc.delete(
+                path = getDeletePageRequest(testPageId),
+                headers = HttpHeaders().authorization(getAccessToken())
+            ) {
+                isSuccess()
             }
+            flush()
+            assertNull(contentService.findPage(testPageId))
+        }
 
-            private fun getDeletePageRequest(id: Long) = Path("/api/content/page/$id")
-
-            @DocumentResponse
-            @Test
-            fun `Given valid data, should delete page and return 200`() {
-                mockMvc.delete(
-                    path = getDeletePageRequest(testPageId),
-                    headers = HttpHeaders().authorization(getAccessToken())
-                ) {
-                    isSuccess()
-                }
-                flush()
-                assertNull(contentService.findPage(testPageId))
+        @Test
+        fun `Given missing WRITE permission, should return 403`() {
+            mockMvc.delete(
+                path = getDeletePageRequest(testPageId),
+                headers = HttpHeaders()
+            ) {
+                isError(HttpStatus.FORBIDDEN)
             }
+            flush()
+            assertNotNull(contentService.findPage(testPageId))
+        }
 
-            @Test
-            fun `Given missing WRITE permission, should return 403`() {
-                mockMvc.delete(
-                    path = getDeletePageRequest(testPageId),
-                    headers = HttpHeaders()
-                ) {
-                    isError(HttpStatus.FORBIDDEN)
-                }
-                flush()
-                assertNotNull(contentService.findPage(testPageId))
+        @Test
+        fun `Given invalid page id, should return 403`() {
+            mockMvc.delete(
+                path = getDeletePageRequest(testPageId + 1),
+                headers = HttpHeaders().authorization(getAccessToken())
+            ) {
+                isError(HttpStatus.FORBIDDEN)
             }
-
-            @Test
-            fun `Given invalid page id, should return 403`() {
-                mockMvc.delete(
-                    path = getDeletePageRequest(testPageId + 1),
-                    headers = HttpHeaders().authorization(getAccessToken())
-                ) {
-                    isError(HttpStatus.FORBIDDEN)
-                }
-                flush()
-                assertNotNull(contentService.findPage(testPageId))
-            }
+            flush()
+            assertNotNull(contentService.findPage(testPageId))
         }
     }
 }
