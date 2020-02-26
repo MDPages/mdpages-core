@@ -39,7 +39,7 @@ interface UserService {
 
     fun getUserFromCredentials(username: String, password: String): User
 
-    fun createUser(username: String, password: String)
+    fun createUser(username: String, password: String): User
 
     fun registerUser(username: String, password: String, email: String)
 
@@ -82,7 +82,7 @@ class UserServiceImpl(
             ?: throw UnauthorizedException()
 
 
-    override fun createUser(username: String, password: String) {
+    override fun createUser(username: String, password: String): User {
         validateUsername(username)
         validatePassword(password)
         if (findUserByUsername(username) != null) throw UsernameTakenException()
@@ -94,6 +94,7 @@ class UserServiceImpl(
         )
 
         userRepository.save(user)
+        return user
     }
 
     override fun registerUser(username: String, password: String, email: String) {
