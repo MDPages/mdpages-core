@@ -89,14 +89,14 @@ internal class ContentControllerTest(
         }
 
         @Test
-        fun `Given invalid parentId, should return 403`() {
+        fun `Given invalid parentId, should return 401`() {
             grantWritePermission(parent)
             mockMvc.put(
                 path = createFolderRequestPath,
                 body = mapper.writeValueAsString(CreateFolderDTO("testFolder", 999)),
                 headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.FORBIDDEN)
+                isError(HttpStatus.UNAUTHORIZED)
             }
         }
 
@@ -106,13 +106,13 @@ internal class ContentControllerTest(
         }
 
         @Test
-        fun `Given missing WRITE permission, should return 403`() {
+        fun `Given missing WRITE permission, should return 401`() {
             mockMvc.put(
                 path = createFolderRequestPath,
                 body = mapper.writeValueAsString(CreateFolderDTO("testFolder", parent.id)),
                 headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.FORBIDDEN)
+                isError(HttpStatus.UNAUTHORIZED)
             }
         }
     }
@@ -169,50 +169,50 @@ internal class ContentControllerTest(
         }
 
         @Test
-        fun `Given invalid folderId, should return 403`() {
+        fun `Given invalid folderId, should return 401`() {
             grantWritePermission(root)
             mockMvc.delete(
                 path = Path(deleteFolderRequestPath + 999),
                 headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.FORBIDDEN)
+                isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
             assertEquals(1,contentService.getFolder(root.id).children.size)
         }
 
         @Test
-        fun `Given missing WRITE permission, should return 403`() {
+        fun `Given missing WRITE permission, should return 401`() {
             mockMvc.delete(
                 path = Path(deleteFolderRequestPath + testFolder.id),
                 headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.FORBIDDEN)
+                isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
             assertEquals(1,contentService.getFolder(root.id).children.size)
         }
 
         @Test
-        fun `Given scope root, should return 403`() {
+        fun `Given scope root, should return 401`() {
             grantWritePermission(root)
             mockMvc.delete(
                 path = Path(deleteFolderRequestPath + root.id),
                 headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.FORBIDDEN)
+                isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
             assertEquals(1,contentService.getFolder(root.id).children.size)
         }
 
         @Test
-        fun `Given not authenticated user, should return 403`() {
+        fun `Given not authenticated user, should return 401`() {
             mockMvc.delete(
                 path = Path(deleteFolderRequestPath + testFolder.id),
                 headers = HttpHeaders().contentTypeJson()
             ) {
-                isError(HttpStatus.FORBIDDEN)
+                isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
             assertEquals(1, contentService.getFolder(root.id).children.size)

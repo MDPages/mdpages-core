@@ -7,6 +7,8 @@ import pl.starchasers.mdpages.authentication.RefreshTokenRepository
 import pl.starchasers.mdpages.authentication.UnauthorizedException
 import pl.starchasers.mdpages.security.permission.PermissionRepository
 import pl.starchasers.mdpages.user.data.User
+import pl.starchasers.mdpages.user.data.dto.InvalidPasswordException
+import pl.starchasers.mdpages.user.data.dto.PasswordTheSameException
 import pl.starchasers.mdpages.user.exception.MalformedPasswordException
 import pl.starchasers.mdpages.user.exception.MalformedUsernameException
 import pl.starchasers.mdpages.user.exception.UserNotFoundException
@@ -44,6 +46,8 @@ interface UserService {
     fun registerUser(username: String, password: String, email: String)
 
     fun deleteUser(username: String)
+
+    fun changePassword(userId: Long, oldPassword: String, newPassword: String)
 }
 
 @Service
@@ -115,6 +119,18 @@ class UserServiceImpl(
             tokenRepository.deleteAllByUser(it)
         }
         userRepository.deleteAllByUsername(username)
+    }
+
+    override fun changePassword(userId: Long, oldPassword: String, newPassword: String) {
+        validatePassword(newPassword)
+
+        if(newPassword == oldPassword) throw PasswordTheSameException()
+
+        val user = getUser(userId)
+        if (!passwordEncoder.matches(oldPassword, user.password)) throw InvalidPasswordException()
+
+        user.password = passwordEncoder.encode(newPassword)
+        userRepository.save(user)
     }
 
     private fun validateUsername(username: String) {

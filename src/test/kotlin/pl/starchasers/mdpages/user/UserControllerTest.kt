@@ -162,17 +162,17 @@ internal class UserControllerTest(
         }
 
         @Test
-        fun `Given unauthenticated user, should do nothing and return 400`() {
+        fun `Given unauthenticated user, should do nothing and return 401`() {
             mockMvc.post(
                 path = changePasswordRequest,
                 headers = HttpHeaders().contentTypeJson(),
                 body = mapper.writeValueAsString(ChangePasswordDTO("passw0rd", "newPassword"))
             ) {
-                isError(HttpStatus.FORBIDDEN)
+                isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
             userService.getUser(exampleUserId).apply {
-                assertTrue(passwordEncoder.matches("newPassword", password))
+                assertTrue(passwordEncoder.matches("passw0rd", password))
             }
         }
     }

@@ -9,6 +9,8 @@ include::{snippets}/RefreshToken/auto-section.adoc[]
 ---
 == User Controller
 include::{snippets}/RegisterUser/auto-section.adoc[]
+---
+include::{snippets}/ChangePassword/auto-section.adoc[]
 
 == Content Controller
 include::{snippets}/CreateFolder/auto-section.adoc[]
