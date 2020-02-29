@@ -9,7 +9,7 @@ node('master') {
     stage('Build') {
         sh "./gradlew assemble"
         sh "mv build/libs/*.jar ./"
-        archiveArtifacts './*.jar'
+        archiveArtifacts '*.jar'
     }
 
     stage('Test') {
