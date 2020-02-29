@@ -17,6 +17,7 @@ node('master') {
             sh "./gradlew test"
         } catch(err) {
             currentBuild.result = 'FAILURE'
+            error('Tests failed.')
         } finally {
             junit "build/test-results/test/*.xml"
         }
