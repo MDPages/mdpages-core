@@ -1,6 +1,6 @@
 package pl.starchasers.mdpages.content.data
 
-import pl.starchasers.mdpages.content.ObjectType
+import pl.starchasers.mdpages.content.MdObjectType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.OneToMany
@@ -23,6 +23,6 @@ class Folder(
 ) : MdObject(
     name = name,
     parent = parent,
-    objectType = ObjectType.FOLDER,
+    objectType = MdObjectType.FOLDER,
     scope = scope
 )
