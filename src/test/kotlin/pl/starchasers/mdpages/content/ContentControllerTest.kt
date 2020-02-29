@@ -292,7 +292,7 @@ internal class ContentControllerTest(
                 headers = HttpHeaders().contentTypeJson().authorization(getAccessToken()),
                 body = mapper.writeValueAsString(CreatePageDTO(rootFolderId + 1, "testTitle", "testContent"))
             ) {
-                isError(HttpStatus.FORBIDDEN)
+                isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
             assertEquals(0, contentService.getFolder(rootFolderId).children.size)
@@ -305,7 +305,7 @@ internal class ContentControllerTest(
                 headers = HttpHeaders().contentTypeJson(),
                 body = mapper.writeValueAsString(CreatePageDTO(rootFolderId, "testTitle", "testContent"))
             ) {
-                isError(HttpStatus.FORBIDDEN)
+                isError(HttpStatus.UNAUTHORIZED)
             }
         }
 
@@ -417,7 +417,7 @@ internal class ContentControllerTest(
                 headers = HttpHeaders().contentTypeJson(),
                 body = mapper.writeValueAsString(UpdatePageDTO("testTitle2", "testContent2"))
             ) {
-                isError(HttpStatus.FORBIDDEN)
+                isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
             verifyPageUnchanged()
@@ -430,7 +430,7 @@ internal class ContentControllerTest(
                 headers = HttpHeaders().contentTypeJson().authorization(getAccessToken()),
                 body = mapper.writeValueAsString(UpdatePageDTO("testTitle2", "testContent2"))
             ) {
-                isError(HttpStatus.FORBIDDEN)
+                isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
             verifyPageUnchanged()
@@ -477,7 +477,7 @@ internal class ContentControllerTest(
                 path = getDeletePageRequest(testPageId),
                 headers = HttpHeaders()
             ) {
-                isError(HttpStatus.FORBIDDEN)
+                isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
             assertNotNull(contentService.findPage(testPageId))
@@ -489,7 +489,7 @@ internal class ContentControllerTest(
                 path = getDeletePageRequest(testPageId + 1),
                 headers = HttpHeaders().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.FORBIDDEN)
+                isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
             assertNotNull(contentService.findPage(testPageId))
