@@ -9,7 +9,7 @@ class User(
     val username: String,
 
     @Column(length = 160, nullable = false)
-    val password: String,
+    var password: String,
 
     @Column(length = 64, nullable = true)
     val email: String?,
