@@ -7,4 +7,6 @@ import pl.starchasers.mdpages.content.data.Page
 @Repository
 interface PageRepository : JpaRepository<Page, Long> {
 
+
+    fun findFirstById(id: Long): Page?
 }

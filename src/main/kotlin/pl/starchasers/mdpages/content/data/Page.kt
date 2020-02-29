@@ -2,18 +2,19 @@ package pl.starchasers.mdpages.content.data
 
 import pl.starchasers.mdpages.content.ObjectType
 import java.time.LocalDateTime
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
 
 @Entity
 class Page(
     @Column(columnDefinition = "TEXT", nullable = false, unique = false)
-    val content: String,
+    var content: String,
 
     @Column(columnDefinition = "DATETIME", nullable = false, unique = false)
     val created: LocalDateTime,
 
     @Column(columnDefinition = "DATETIME", nullable = false, unique = false)
-    val lastEdited: LocalDateTime,
+    var lastEdited: LocalDateTime,
 
     @Column(nullable = false)
     var deleted: Boolean = false,
