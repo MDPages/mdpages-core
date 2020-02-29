@@ -1,6 +1,6 @@
 package pl.starchasers.mdpages.content
 
-enum class ObjectType {
+enum class MdObjectType {
     PAGE,
     FOLDER
 }

@@ -1,6 +1,6 @@
 package pl.starchasers.mdpages.content.data
 
-import pl.starchasers.mdpages.content.ObjectType
+import pl.starchasers.mdpages.content.MdObjectType
 import java.time.LocalDateTime
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -22,4 +22,4 @@ class Page(
     name: String,
     parent: Folder?,
     scope: Folder? = null
-) : MdObject(name = name, parent = parent, objectType = ObjectType.PAGE, scope = scope)
+) : MdObject(name = name, parent = parent, objectType = MdObjectType.PAGE, scope = scope)
