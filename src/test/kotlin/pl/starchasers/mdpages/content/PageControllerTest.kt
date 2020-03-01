@@ -1,8 +1,7 @@
 package pl.starchasers.mdpages.content
 
 import no.skatteetaten.aurora.mockmvc.extensions.*
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -147,9 +146,9 @@ internal class PageControllerTest(
             flush()
 
             (contentService.getFolder(rootFolderId).children.elementAt(0) as Page).apply {
-                assertEquals("testTitle", name)
-                assertEquals("testContent", content)
-                assertEquals("/root/testTitle", fullPath)
+                Assertions.assertEquals("testTitle", name)
+                Assertions.assertEquals("testContent", content)
+                Assertions.assertEquals("/root/testTitle", fullPath)
             }
         }
 
@@ -186,7 +185,7 @@ internal class PageControllerTest(
                 isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
-            assertEquals(0, contentService.getFolder(rootFolderId).children.size)
+            Assertions.assertEquals(0, contentService.getFolder(rootFolderId).children.size)
         }
 
         @Test
@@ -237,8 +236,8 @@ internal class PageControllerTest(
         }
 
         private fun verifyPageUnchanged() = contentService.getPage(testPageId).apply {
-            assertEquals("testTitle", name)
-            assertEquals("testContent", content)
+            Assertions.assertEquals("testTitle", name)
+            Assertions.assertEquals("testContent", content)
         }
 
         @DocumentResponse
@@ -254,9 +253,9 @@ internal class PageControllerTest(
             flush()
 
             contentService.getPage(testPageId).apply {
-                assertEquals("testTitle2", name)
-                assertEquals("testContent2", content)
-                assertEquals("/root/testTitle2", fullPath)
+                Assertions.assertEquals("testTitle2", name)
+                Assertions.assertEquals("testContent2", content)
+                Assertions.assertEquals("/root/testTitle2", fullPath)
             }
 
         }
@@ -360,7 +359,7 @@ internal class PageControllerTest(
                 isSuccess()
             }
             flush()
-            assertNull(contentService.findPage(testPageId))
+            Assertions.assertNull(contentService.findPage(testPageId))
         }
 
         @Test
@@ -372,7 +371,7 @@ internal class PageControllerTest(
                 isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
-            assertNotNull(contentService.findPage(testPageId))
+            Assertions.assertNotNull(contentService.findPage(testPageId))
         }
 
         @Test
@@ -384,7 +383,8 @@ internal class PageControllerTest(
                 isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
-            assertNotNull(contentService.findPage(testPageId))
+            Assertions.assertNotNull(contentService.findPage(testPageId))
         }
     }
+
 }
