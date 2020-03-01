@@ -4,6 +4,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import pl.starchasers.mdpages.content.data.dto.CreateFolderDTO
 import pl.starchasers.mdpages.content.data.dto.FolderIdResponseDTO
+import pl.starchasers.mdpages.content.data.dto.FolderResponseDTO
 import pl.starchasers.mdpages.security.annotation.PathScopeSecured
 import pl.starchasers.mdpages.security.annotation.ScopeSecured
 import pl.starchasers.mdpages.security.permission.PermissionType
@@ -13,16 +14,22 @@ import pl.starchasers.mdpages.util.BasicResponseDTO
 @RestController
 class FolderController(
     private val contentService: ContentService
-){
+) {
 
+    /**
+     * Will not load second level subfolders, which means all `children` fields, except root, will be empty.
+     * If you need them, use getFolderTree
+     */
+    @PathScopeSecured(PermissionType.READ, pathParameterName = "folderId")
     @GetMapping("/{folderId}")
-    fun getFolder() {
-
+    fun getFolder(@PathVariable(name = "folderId") folderId: Long): FolderResponseDTO {
+        TODO()
     }
 
+    @PathScopeSecured(PermissionType.READ, pathParameterName = "folderId")
     @GetMapping("/{folderId}/tree")
-    fun getFolderTree(){
-
+    fun getFolderTree(@PathVariable(name = "folderId") folderId: Long): FolderResponseDTO {
+        TODO()
     }
 
     @ScopeSecured(PermissionType.WRITE)

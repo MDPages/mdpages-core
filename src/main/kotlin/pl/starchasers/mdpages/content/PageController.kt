@@ -3,6 +3,7 @@ package pl.starchasers.mdpages.content
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import pl.starchasers.mdpages.content.data.dto.CreatePageDTO
+import pl.starchasers.mdpages.content.data.dto.PageDetailsResponseDTO
 import pl.starchasers.mdpages.content.data.dto.PageIdResponseDTO
 import pl.starchasers.mdpages.content.data.dto.UpdatePageDTO
 import pl.starchasers.mdpages.security.annotation.PathScopeSecured
@@ -15,6 +16,12 @@ import pl.starchasers.mdpages.util.BasicResponseDTO
 class PageController(
     private val contentService: ContentService
 ) {
+
+    @PathScopeSecured(PermissionType.READ, pathParameterName = "pageId")
+    @GetMapping("/{pageId}")
+    fun getPage(@PathVariable(name = "pageId") pageId: Long): PageDetailsResponseDTO {
+        TODO()
+    }
 
     @ScopeSecured(PermissionType.WRITE)
     @PutMapping("")
