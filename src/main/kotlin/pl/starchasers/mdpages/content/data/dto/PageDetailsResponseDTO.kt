@@ -8,6 +8,8 @@ class PageDetailsResponseDTO(
     val name: String,
     val content: String,
     val dateCreated: LocalDateTime,
-    val modified: LocalDateTime,
-    val type: MdObjectType = MdObjectType.PAGE
+    val dateModified: LocalDateTime,
+    val type: MdObjectType = MdObjectType.PAGE,
+    val parentFolderId: Long,
+    val scopeFolderId: Long
 )

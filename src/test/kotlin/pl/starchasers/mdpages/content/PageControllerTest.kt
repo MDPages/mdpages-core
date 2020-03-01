@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.Mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -40,6 +41,77 @@ internal class PageControllerTest(
 
     fun getAccessToken(): String {
         return tokenService.issueAccessToken(tokenService.issueRefreshToken(userService.getUserByUsername("testUser")))
+    }
+
+    @Transactional
+    @OrderTests
+    @Nested
+    inner class GetPage() : MockMvcTestBase() {
+        private fun getRequestPath(id: Long): Path = Path("/api/content/page/$id")
+        private var rootFolderId: Long = -1
+        private var testPageId: Long = -1
+
+        @BeforeEach
+        fun setup() {
+            val folder = Folder(true, mutableSetOf(), "root", null, null)
+            contentService.createFolder(folder)
+            rootFolderId = folder.id
+
+            val page = contentService.createPage(rootFolderId, "testPage", "testContent")
+            testPageId = page.id
+            flush()
+        }
+
+        private fun grantReadPermission() {
+            permissionService.grantScopePermission(
+                contentService.getFolder(rootFolderId),
+                PermissionType.READ,
+                userService.getUserByUsername("testUser")
+            )
+            flush()
+        }
+
+        @DocumentResponse
+        @Test
+        fun `Given valid data, should return page details`() {
+            grantReadPermission()
+
+            mockMvc.get(
+                path = getRequestPath(testPageId),
+                headers = HttpHeaders().authorization(getAccessToken())
+            ) {
+                isSuccess()
+                responseJsonPath("$.id").equalsLong(testPageId)
+                responseJsonPath("$.name").equalsValue("testPage")
+                responseJsonPath("$.content").equalsObject("testContent")
+                responseJsonPath("$.dateCreated").isNotEmpty()
+                responseJsonPath("$.dateModified").isNotEmpty()
+                responseJsonPath("$.type").equalsValue("PAGE")
+                responseJsonPath("$.parentFolderId").equalsLong(rootFolderId)
+                responseJsonPath("$.scopeFolderId").equalsLong(rootFolderId)
+            }
+        }
+
+        @Test
+        fun `Given invalid page id, should return 404`() {
+            grantReadPermission()
+            mockMvc.get(
+                path = getRequestPath(testPageId + 1),
+                headers = HttpHeaders().authorization(getAccessToken())
+            ) {
+                isError(HttpStatus.NOT_FOUND)
+            }
+        }
+
+        @Test
+        fun `Given missing READ permission, should return 401`() {
+            mockMvc.get(
+                path = getRequestPath(testPageId),
+                headers = HttpHeaders().authorization(getAccessToken())
+            ) {
+                isError(HttpStatus.UNAUTHORIZED)
+            }
+        }
     }
 
     @Transactional
