@@ -35,7 +35,7 @@ class FolderController(
     @ScopeSecured(PermissionType.WRITE)
     @PutMapping("")
     fun createFolder(@Validated @RequestBody createFolderDTO: CreateFolderDTO): FolderIdResponseDTO {
-        return FolderIdResponseDTO(contentService.createFolder(createFolderDTO.name, createFolderDTO.parent))
+        return FolderIdResponseDTO(contentService.createFolder(createFolderDTO.name, createFolderDTO.parent).id)
     }
 
     /**

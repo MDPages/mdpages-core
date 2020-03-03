@@ -28,7 +28,7 @@ interface ContentService {
 
     fun createFolder(folder: Folder)
 
-    fun createFolder(name: String, parentId: Long): Long
+    fun createFolder(name: String, parentId: Long): Folder
 
     fun deleteFolder(id: Long)
 
@@ -100,7 +100,7 @@ class ContentServiceImpl(
     }
 
     @Transactional
-    override fun createFolder(name: String, parentId: Long): Long {
+    override fun createFolder(name: String, parentId: Long): Folder {
         validateFolderName(name)
         val parentFolder: Folder = getObject(parentId) as Folder
 
@@ -120,7 +120,7 @@ class ContentServiceImpl(
         parentFolder.children.add(newFolder)
         folderRepository.save(parentFolder)
 
-        return newFolder.id
+        return newFolder
     }
 
     @Transactional
