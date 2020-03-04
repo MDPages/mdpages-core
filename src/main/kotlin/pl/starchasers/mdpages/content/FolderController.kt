@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*
 import pl.starchasers.mdpages.content.data.dto.CreateFolderDTO
 import pl.starchasers.mdpages.content.data.dto.FolderIdResponseDTO
 import pl.starchasers.mdpages.content.data.dto.FolderResponseDTO
+import pl.starchasers.mdpages.content.data.dto.ScopeListResponseDTO
 import pl.starchasers.mdpages.security.annotation.PathScopeSecured
 import pl.starchasers.mdpages.security.annotation.ScopeSecured
 import pl.starchasers.mdpages.security.permission.PermissionType
@@ -29,6 +30,15 @@ class FolderController(
     @PathScopeSecured(PermissionType.READ, pathParameterName = "folderId")
     @GetMapping("/{folderId}/tree")
     fun getFolderTree(@PathVariable(name = "folderId") folderId: Long): FolderResponseDTO {
+        TODO()
+    }
+
+    /**
+     * Returns list of scopes readable by current user. Scopes are folders with one difference, they have no parent.
+     * Scope id can be used in all /api/content/folder methods, except delete
+     */
+    @GetMapping("/scopes")
+    fun getScopes(): ScopeListResponseDTO {
         TODO()
     }
 

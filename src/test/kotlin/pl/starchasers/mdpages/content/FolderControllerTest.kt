@@ -251,7 +251,16 @@ internal class FolderControllerTest(
 
         @Test
         fun `Given page as parentId, should return 400`() {
-            //TODO: implement page creation
+            val page = contentService.createPage(parent.id, "testPage", "testContent")
+            flush()
+
+            mockMvc.put(
+                path = createFolderRequestPath,
+                body = mapper.writeValueAsString(CreateFolderDTO("testFolder", page.id)),
+                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
+            ) {
+                isError(HttpStatus.BAD_REQUEST)
+            }
         }
 
         @Test
