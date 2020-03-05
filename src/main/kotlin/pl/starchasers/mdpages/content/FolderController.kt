@@ -19,7 +19,7 @@ class FolderController(
 
     /**
      * Will not load second level subfolders, which means all `children` fields, except root, will be empty.
-     * If you need them, use getFolderTree
+     * If you need them, use [getFolderTree]
      */
     @PathScopeSecured(PermissionType.READ, pathParameterName = "folderId")
     @GetMapping("/{folderId}")
@@ -36,6 +36,7 @@ class FolderController(
     /**
      * Returns list of scopes readable by current user. Scopes are folders with one difference, they have no parent.
      * Scope id can be used in all /api/content/folder methods, except delete
+     * To get scope contents, use [getFolder] or [getFolderTree] methods
      */
     @GetMapping("/scopes")
     fun getScopes(): ScopeListResponseDTO {

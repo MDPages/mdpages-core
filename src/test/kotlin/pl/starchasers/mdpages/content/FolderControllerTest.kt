@@ -1,7 +1,10 @@
 package pl.starchasers.mdpages.content
 
 import no.skatteetaten.aurora.mockmvc.extensions.*
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -39,6 +42,47 @@ internal class FolderControllerTest(
 
     fun getAccessToken(): String {
         return tokenService.issueAccessToken(tokenService.issueRefreshToken(userService.getUserByUsername("testUser")))
+    }
+
+    @Transactional
+    @OrderTests
+    @Nested
+    inner class GetScopes : MockMvcTestBase() {
+
+        private val getScopesRequest = Path("/api/content/folder/scopes")
+
+        @DocumentResponse
+        @Test
+        fun `Given valid request, should return readable scopes`() {
+            val folder = Folder(true, mutableSetOf(), "testScope", null, null)
+            contentService.createFolder(folder)
+            grantReadPermission(folder)
+            flush()
+
+            mockMvc.get(
+                path = getScopesRequest,
+                headers = HttpHeaders().authorization(getAccessToken())
+            ) {
+                isSuccess()
+                responseJsonPath("$.scopes[0].name").equalsValue("testScope")
+                responseJsonPath("$.scopes[0].id").equalsLong(folder.id)
+            }
+        }
+
+        @Test
+        fun `Given missing READ permission, should not return scope`() {
+            val folder = Folder(true, mutableSetOf(), "testScope", null, null)
+            contentService.createFolder(folder)
+            flush()
+
+            mockMvc.get(
+                path = getScopesRequest,
+                headers = HttpHeaders().authorization(getAccessToken())
+            ) {
+                isSuccess()
+                responseJsonPath("$.scopes").isEmpty()
+            }
+        }
     }
 
     @Transactional
