@@ -3,7 +3,6 @@ package pl.starchasers.mdpages.content
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import pl.starchasers.mdpages.content.data.Folder
-import pl.starchasers.mdpages.content.data.Page
 import pl.starchasers.mdpages.content.data.dto.*
 import pl.starchasers.mdpages.security.annotation.PathScopeSecured
 import pl.starchasers.mdpages.security.annotation.ScopeSecured
@@ -20,17 +19,21 @@ class FolderController(
     /**
      * Will not load second level subfolders, which means all `children` fields, except root, will be empty.
      * If you need them, use [getFolderTree]
+     * @param folderId Id of the queried folder
      */
     @PathScopeSecured(PermissionType.READ, pathParameterName = "folderId")
     @GetMapping("/{folderId}")
-    fun getFolder(@PathVariable(name = "folderId") folderId: Long): FolderResponseDTO =
-        mapFolder(contentService.getFolder(folderId))
+    fun getFolder(@PathVariable(name = "folderId") folderId: Long): FolderResponseWrapperDTO =
+        FolderResponseWrapperDTO(mapFolder(contentService.getFolder(folderId)))
 
 
+    /**
+     * @param folderId Id of the queried folder
+     */
     @PathScopeSecured(PermissionType.READ, pathParameterName = "folderId")
     @GetMapping("/{folderId}/tree")
-    fun getFolderTree(@PathVariable(name = "folderId") folderId: Long): FolderResponseDTO =
-        mapFolder(contentService.getFolder(folderId), recursive = true)
+    fun getFolderTree(@PathVariable(name = "folderId") folderId: Long): FolderResponseWrapperDTO =
+        FolderResponseWrapperDTO(mapFolder(contentService.getFolder(folderId), recursive = true))
 
     /**
      * Returns list of scopes readable by current user. Scopes are folders with one difference, they have no parent.

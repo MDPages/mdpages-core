@@ -12,16 +12,29 @@ include::{snippets}/RegisterUser/auto-section.adoc[]
 ---
 include::{snippets}/ChangePassword/auto-section.adoc[]
 
-== Content Controller
-include::{snippets}/CreateFolder/auto-section.adoc[]
----
-include::{snippets}/DeleteFolder/auto-section.adoc[]
----
+== Page Controller
 include::{snippets}/CreatePage/auto-section.adoc[]
 ---
 include::{snippets}/ModifyPage/auto-section.adoc[]
 ---
 include::{snippets}/DeletePage/auto-section.adoc[]
+---
+include::{snippets}/GetPage/auto-section.adoc[]
+
+
+== Folder Controller
+include::{snippets}/GetFolder/auto-section.adoc[]
+---
+include::{snippets}/GetFolderTree/auto-section.adoc[]
+---
+include::{snippets}/GetScopes/auto-section.adoc[]
+---
+include::{snippets}/CreateFolder/auto-section.adoc[]
+---
+include::{snippets}/DeleteFolder/auto-section.adoc[]
+---
+
+== Content Controller
 
 == Admin Controller
 include::{snippets}/CreateUser/auto-section.adoc[]

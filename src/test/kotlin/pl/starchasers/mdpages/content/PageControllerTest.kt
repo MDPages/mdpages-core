@@ -81,14 +81,13 @@ internal class PageControllerTest(
                 headers = HttpHeaders().authorization(getAccessToken())
             ) {
                 isSuccess()
-                responseJsonPath("$.id").equalsLong(testPageId)
-                responseJsonPath("$.name").equalsValue("testPage")
-                responseJsonPath("$.content").equalsValue("testContent")
-                responseJsonPath("$.dateCreated").isNotEmpty()
-                responseJsonPath("$.dateModified").isNotEmpty()
-                responseJsonPath("$.type").equalsValue("PAGE")
-                responseJsonPath("$.parentFolderId").equalsLong(rootFolderId)
-                responseJsonPath("$.scopeFolderId").equalsLong(rootFolderId)
+                responseJsonPath("$.page.id").equalsLong(testPageId)
+                responseJsonPath("$.page.name").equalsValue("testPage")
+                responseJsonPath("$.page.content").equalsValue("testContent")
+                responseJsonPath("$.page.dateCreated").isNotEmpty()
+                responseJsonPath("$.page.dateModified").isNotEmpty()
+                responseJsonPath("$.page.parentFolderId").equalsLong(rootFolderId)
+                responseJsonPath("$.page.scopeFolderId").equalsLong(rootFolderId)
             }
         }
 

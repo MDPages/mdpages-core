@@ -113,9 +113,9 @@ internal class FolderControllerTest(
                 headers = HttpHeaders().authorization(getAccessToken())
             ) {
                 isSuccess()
-                responseJsonPath("$.name").equalsValue("root")
-                responseJsonPath("$.id").equalsLong(rootFolderId)
-                responseJsonPath("$.children").isNotEmpty()
+                responseJsonPath("$.folder.name").equalsValue("root")
+                responseJsonPath("$.folder.id").equalsLong(rootFolderId)
+                responseJsonPath("$.folder.children").isNotEmpty()
             }
         }
 
@@ -130,10 +130,10 @@ internal class FolderControllerTest(
                 headers = HttpHeaders().authorization(getAccessToken())
             ) {
                 isSuccess()
-                responseJsonPath("$.name").equalsValue("root")
-                responseJsonPath("$.id").equalsLong(rootFolderId)
-                responseJsonPath("$.children[0].name").equalsValue("childPage")
-                responseJsonPath("$.children[0].id").equalsLong(pageChild.id)
+                responseJsonPath("$.folder.name").equalsValue("root")
+                responseJsonPath("$.folder.id").equalsLong(rootFolderId)
+                responseJsonPath("$.folder.children[0].name").equalsValue("childPage")
+                responseJsonPath("$.folder.children[0].id").equalsLong(pageChild.id)
             }
         }
 
@@ -148,11 +148,11 @@ internal class FolderControllerTest(
                 headers = HttpHeaders().authorization(getAccessToken())
             ) {
                 isSuccess()
-                responseJsonPath("$.name").equalsValue("root")
-                responseJsonPath("$.id").equalsLong(rootFolderId)
-                responseJsonPath("$.children[0].name").equalsValue("childFolder")
-                responseJsonPath("$.children[0].id").equalsLong(folderChild.id)
-                responseJsonPath("$.children[0].children").isEmpty()
+                responseJsonPath("$.folder.name").equalsValue("root")
+                responseJsonPath("$.folder.id").equalsLong(rootFolderId)
+                responseJsonPath("$.folder.children[0].name").equalsValue("childFolder")
+                responseJsonPath("$.folder.children[0].id").equalsLong(folderChild.id)
+                responseJsonPath("$.folder.children[0].children").isEmpty()
             }
         }
 
@@ -207,12 +207,12 @@ internal class FolderControllerTest(
                 headers = HttpHeaders().authorization(getAccessToken())
             ) {
                 isSuccess()
-                responseJsonPath("$.id").equalsLong(rootFolderId)
-                responseJsonPath("$.name").equalsValue("root")
-                responseJsonPath("$.children[0].id").equalsLong(childFolder.id)
-                responseJsonPath("$.children[0].name").equalsValue(childFolder.name)
-                responseJsonPath("$.children[0].children[0].name").equalsValue(childPage.name)
-                responseJsonPath("$.children[0].children[0].id").equalsLong(childPage.id)
+                responseJsonPath("$.folder.id").equalsLong(rootFolderId)
+                responseJsonPath("$.folder.name").equalsValue("root")
+                responseJsonPath("$.folder.children[0].id").equalsLong(childFolder.id)
+                responseJsonPath("$.folder.children[0].name").equalsValue(childFolder.name)
+                responseJsonPath("$.folder.children[0].children[0].name").equalsValue(childPage.name)
+                responseJsonPath("$.folder.children[0].children[0].id").equalsLong(childPage.id)
             }
         }
 
