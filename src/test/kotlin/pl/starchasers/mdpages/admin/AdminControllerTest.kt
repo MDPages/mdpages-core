@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 import pl.starchasers.mdpages.*
 import pl.starchasers.mdpages.admin.data.CreateUserDTO
 import pl.starchasers.mdpages.authentication.TokenService
+import pl.starchasers.mdpages.security.permission.GlobalPermissionType
 import pl.starchasers.mdpages.security.permission.PermissionService
 import pl.starchasers.mdpages.security.permission.PermissionType
 import pl.starchasers.mdpages.user.UserService
@@ -32,7 +33,7 @@ internal class AdminControllerTest(
     fun createTestAdmin() {
         userService.createUser("testAdmin", "password")
         testAdmin = userService.getUserByUsername("testAdmin")
-        permissionService.grantGlobalPermission(PermissionType.ADMIN, testAdmin)
+        permissionService.grantGlobalPermission(GlobalPermissionType.ADMIN, testAdmin)
     }
 
     @BeforeAll

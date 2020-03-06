@@ -1,6 +1,6 @@
 package pl.starchasers.mdpages.user.data
 
-import com.sun.istack.NotNull
+import pl.starchasers.mdpages.security.permission.GlobalPermission
 import javax.persistence.*
 
 @Entity(name = "User")
@@ -13,6 +13,9 @@ class User(
 
     @Column(length = 64, nullable = true)
     val email: String?,
+
+    @OneToMany(mappedBy = "user")
+    val globalPermissions: MutableSet<GlobalPermission>,
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

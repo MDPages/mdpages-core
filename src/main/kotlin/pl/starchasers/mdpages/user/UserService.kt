@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import pl.starchasers.mdpages.authentication.RefreshTokenRepository
 import pl.starchasers.mdpages.authentication.UnauthorizedException
+import pl.starchasers.mdpages.security.permission.GlobalPermission
 import pl.starchasers.mdpages.security.permission.PermissionRepository
 import pl.starchasers.mdpages.user.data.User
 import pl.starchasers.mdpages.user.data.dto.InvalidPasswordException
@@ -94,7 +95,8 @@ class UserServiceImpl(
         val user = User(
             username,
             passwordEncoder.encode(password),
-            null
+            null,
+            mutableSetOf()
         )
 
         userRepository.save(user)
@@ -107,7 +109,7 @@ class UserServiceImpl(
 
         if (findUserByUsername(username) != null) throw UsernameTakenException()
 
-        val user = User(username, passwordEncoder.encode(password), email)
+        val user = User(username, passwordEncoder.encode(password), email, mutableSetOf())
 
         userRepository.save(user)
     }
@@ -124,7 +126,7 @@ class UserServiceImpl(
     override fun changePassword(userId: Long, oldPassword: String, newPassword: String) {
         validatePassword(newPassword)
 
-        if(newPassword == oldPassword) throw PasswordTheSameException()
+        if (newPassword == oldPassword) throw PasswordTheSameException()
 
         val user = getUser(userId)
         if (!passwordEncoder.matches(oldPassword, user.password)) throw InvalidPasswordException()

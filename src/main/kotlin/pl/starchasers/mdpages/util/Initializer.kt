@@ -8,6 +8,7 @@ import pl.starchasers.mdpages.content.DEFAULT_SCOPE_PATH
 import pl.starchasers.mdpages.content.data.Folder
 import pl.starchasers.mdpages.content.exception.ObjectDoesntExistException
 import pl.starchasers.mdpages.content.repository.FolderRepository
+import pl.starchasers.mdpages.security.permission.GlobalPermissionType
 import pl.starchasers.mdpages.security.permission.PermissionService
 import pl.starchasers.mdpages.security.permission.PermissionType
 import pl.starchasers.mdpages.user.UserService
@@ -22,8 +23,6 @@ class Initializer(
     private val folderRepository: FolderRepository,
     private val permissionService: PermissionService
 ) {
-//    @PersistenceContext
-//    private lateinit var entityManager: EntityManager
 
     @Value("\${devenv}")
     private val isDevEnv: Boolean = false
@@ -35,8 +34,6 @@ class Initializer(
 
         initRootAccount()
         verifyRootPermissions()
-
-        folderTest()
     }
 
     private fun initRootAccount() {
@@ -55,7 +52,6 @@ class Initializer(
                     true, mutableSetOf(), DEFAULT_SCOPE_PATH.removePrefix("/"), null
                 )
             )
-//        entityManager.flush()
     }
 
     private fun injectDefaultScope() {
@@ -65,14 +61,7 @@ class Initializer(
 
     private fun verifyRootPermissions() {
         val root = userService.getUserByUsername("root")
-        if (!permissionService.hasGlobalPermission(PermissionType.ADMIN, root))
-            permissionService.grantGlobalPermission(PermissionType.ADMIN, root)
-    }
-
-    private fun folderTest() {
-//        val parent = Folder(true, mutableSetOf(), "root", null, null)
-//        contentService.createFolder(parent)
-//        contentService.createFolder(Folder(false, mutableSetOf(), "testFolder", parent, parent))
-//        contentService.deleteObjectRecursive(parent)
+        if (!permissionService.hasGlobalPermission(GlobalPermissionType.ADMIN, root))
+            permissionService.grantGlobalPermission(GlobalPermissionType.ADMIN, root)
     }
 }
