@@ -6,6 +6,7 @@ import pl.starchasers.mdpages.content.data.dto.CreatePageDTO
 import pl.starchasers.mdpages.content.data.dto.PageDetailsResponseDTO
 import pl.starchasers.mdpages.content.data.dto.PageIdResponseDTO
 import pl.starchasers.mdpages.content.data.dto.UpdatePageDTO
+import pl.starchasers.mdpages.content.exception.ObjectDoesntExistException
 import pl.starchasers.mdpages.security.annotation.PathScopeSecured
 import pl.starchasers.mdpages.security.annotation.ScopeSecured
 import pl.starchasers.mdpages.security.permission.PermissionType
@@ -19,9 +20,20 @@ class PageController(
 
     @PathScopeSecured(PermissionType.READ, pathParameterName = "pageId")
     @GetMapping("/{pageId}")
-    fun getPage(@PathVariable(name = "pageId") pageId: Long): PageDetailsResponseDTO {
-        TODO()
-    }
+    fun getPage(@PathVariable(name = "pageId") pageId: Long): PageDetailsResponseDTO =
+        contentService.getPage(pageId).run {
+            PageDetailsResponseDTO(
+                id,
+                name,
+                content,
+                created,
+                lastEdited,
+                MdObjectType.PAGE,
+                parent?.id ?: throw ObjectDoesntExistException(),//TODO caused by
+                scope?.id ?: throw ObjectDoesntExistException() //TODO caused by
+            )
+        }
+
 
     @ScopeSecured(PermissionType.WRITE)
     @PutMapping("")

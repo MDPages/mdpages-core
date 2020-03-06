@@ -11,6 +11,7 @@ import pl.starchasers.mdpages.content.repository.ObjectRepository
 import pl.starchasers.mdpages.content.repository.PageRepository
 import pl.starchasers.mdpages.security.permission.PermissionRepository
 import pl.starchasers.mdpages.security.permission.PermissionService
+import pl.starchasers.mdpages.security.permission.PermissionType
 import java.time.LocalDateTime
 import javax.transaction.Transactional
 
@@ -53,6 +54,8 @@ interface ContentService {
     fun getPage(id: Long): Page
 
     fun findPage(id: Long): Page?
+
+    fun getScopesReadableByUser(userId: Long?): List<Folder>
 }
 
 @Service
@@ -60,7 +63,8 @@ class ContentServiceImpl(
     private val folderRepository: FolderRepository,
     private val pageRepository: PageRepository,
     private val mdObjectRepository: ObjectRepository,
-    private val permissionRepository: PermissionRepository
+    private val permissionRepository: PermissionRepository,
+    private val permissionService: PermissionService
 ) :
     ContentService {
 
@@ -87,6 +91,10 @@ class ContentServiceImpl(
     override fun getPage(id: Long): Page = pageRepository.findFirstById(id) ?: throw ObjectDoesntExistException()
 
     override fun findPage(id: Long): Page? = pageRepository.findFirstById(id)
+
+    override fun getScopesReadableByUser(userId: Long?): List<Folder> = folderRepository.findAll()
+        .filter { permissionService.hasScopePermission(it.fullPath, PermissionType.READ, userId) }
+
 
     override fun createFolder(folder: Folder) {
         validateFolderName(folder.name)

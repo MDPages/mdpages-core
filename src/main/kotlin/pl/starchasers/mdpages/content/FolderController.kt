@@ -2,14 +2,12 @@ package pl.starchasers.mdpages.content
 
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
-import pl.starchasers.mdpages.content.data.dto.CreateFolderDTO
-import pl.starchasers.mdpages.content.data.dto.FolderIdResponseDTO
-import pl.starchasers.mdpages.content.data.dto.FolderResponseDTO
-import pl.starchasers.mdpages.content.data.dto.ScopeListResponseDTO
+import pl.starchasers.mdpages.content.data.dto.*
 import pl.starchasers.mdpages.security.annotation.PathScopeSecured
 import pl.starchasers.mdpages.security.annotation.ScopeSecured
 import pl.starchasers.mdpages.security.permission.PermissionType
 import pl.starchasers.mdpages.util.BasicResponseDTO
+import java.security.Principal
 
 @RequestMapping("/api/content/folder")
 @RestController
@@ -39,9 +37,11 @@ class FolderController(
      * To get scope contents, use [getFolder] or [getFolderTree] methods
      */
     @GetMapping("/scopes")
-    fun getScopes(): ScopeListResponseDTO {
-        TODO()
-    }
+    fun getScopes(principal: Principal?): ScopeListResponseDTO =
+        ScopeListResponseDTO(
+            contentService.getScopesReadableByUser(principal?.name?.toLongOrNull())
+                .map { ScopeResponseDTO(it.id, it.name) }
+        )
 
     @ScopeSecured(PermissionType.WRITE)
     @PutMapping("")

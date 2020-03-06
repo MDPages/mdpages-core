@@ -83,7 +83,7 @@ internal class PageControllerTest(
                 isSuccess()
                 responseJsonPath("$.id").equalsLong(testPageId)
                 responseJsonPath("$.name").equalsValue("testPage")
-                responseJsonPath("$.content").equalsObject("testContent")
+                responseJsonPath("$.content").equalsValue("testContent")
                 responseJsonPath("$.dateCreated").isNotEmpty()
                 responseJsonPath("$.dateModified").isNotEmpty()
                 responseJsonPath("$.type").equalsValue("PAGE")
@@ -93,13 +93,13 @@ internal class PageControllerTest(
         }
 
         @Test
-        fun `Given invalid page id, should return 404`() {
+        fun `Given invalid page id, should return 401`() {
             grantReadPermission()
             mockMvc.get(
                 path = getRequestPath(testPageId + 1),
                 headers = HttpHeaders().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.NOT_FOUND)
+                isError(HttpStatus.UNAUTHORIZED)
             }
         }
 
