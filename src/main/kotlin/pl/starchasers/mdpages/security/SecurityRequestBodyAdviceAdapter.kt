@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter
 import pl.starchasers.mdpages.authentication.UnauthorizedException
 import pl.starchasers.mdpages.content.ContentService
+import pl.starchasers.mdpages.content.exception.ObjectDoesntExistException
 import pl.starchasers.mdpages.security.annotation.ScopeSecured
 import pl.starchasers.mdpages.security.permission.PermissionService
 import java.lang.reflect.Type
@@ -37,7 +38,7 @@ class SecurityRequestBodyAdviceAdapter(val permissionService: PermissionService,
             throw UnauthorizedException()
         }
         val scopeFolder =
-            contentService.findObject(body.getObjectId())?.run { scope ?: this } ?: throw UnauthorizedException()
+            contentService.findObject(body.getObjectId())?.run { scope ?: this } ?: throw ObjectDoesntExistException()
         val principal: Authentication? = SecurityContextHolder.getContext().authentication
 
 

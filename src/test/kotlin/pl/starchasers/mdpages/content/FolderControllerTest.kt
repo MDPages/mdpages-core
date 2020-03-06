@@ -157,14 +157,14 @@ internal class FolderControllerTest(
         }
 
         @Test
-        fun `Given invalid folder id, should return 401`() {
+        fun `Given invalid folder id, should return 404`() {
             grantReadPermission(contentService.getFolder(rootFolderId))
 
             mockMvc.get(
                 path = getFolderRequest(rootFolderId + 1),
                 headers = HttpHeaders().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.UNAUTHORIZED)
+                isError(HttpStatus.NOT_FOUND)
             }
         }
 
@@ -217,13 +217,13 @@ internal class FolderControllerTest(
         }
 
         @Test
-        fun `Given invalid folder id, should return 401`() {
+        fun `Given invalid folder id, should return 404`() {
             grantReadPermission(contentService.getFolder(rootFolderId))
             mockMvc.get(
                 path = getTreeRequest(rootFolderId + 1),
                 headers = HttpHeaders().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.UNAUTHORIZED)
+                isError(HttpStatus.NOT_FOUND)
             }
         }
 
@@ -282,19 +282,20 @@ internal class FolderControllerTest(
         }
 
         @Test
-        fun `Given invalid parentId, should return 401`() {
+        fun `Given invalid parentId, should return 404`() {
             grantWritePermission(parent)
             mockMvc.put(
                 path = createFolderRequestPath,
                 body = mapper.writeValueAsString(CreateFolderDTO("testFolder", 999)),
                 headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.UNAUTHORIZED)
+                isError(HttpStatus.NOT_FOUND)
             }
         }
 
         @Test
-        fun `Given page as parentId, should return 401`() {
+        fun `Given page as parentId, should return 400`() {
+            grantWritePermission(parent)
             val page = contentService.createPage(parent.id, "testPage", "testContent")
             flush()
 
@@ -303,7 +304,7 @@ internal class FolderControllerTest(
                 body = mapper.writeValueAsString(CreateFolderDTO("testFolder", page.id)),
                 headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.UNAUTHORIZED)
+                isError(HttpStatus.BAD_REQUEST)
             }
         }
 
@@ -371,13 +372,13 @@ internal class FolderControllerTest(
         }
 
         @Test
-        fun `Given invalid folderId, should return 401`() {
+        fun `Given invalid folderId, should return 404`() {
             grantWritePermission(root)
             mockMvc.delete(
                 path = Path(deleteFolderRequestPath + 999),
                 headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.UNAUTHORIZED)
+                isError(HttpStatus.NOT_FOUND)
             }
             flush()
             Assertions.assertEquals(1, contentService.getFolder(root.id).children.size)
@@ -396,13 +397,13 @@ internal class FolderControllerTest(
         }
 
         @Test
-        fun `Given scope root, should return 401`() {
+        fun `Given scope root, should return 400`() {
             grantWritePermission(root)
             mockMvc.delete(
                 path = Path(deleteFolderRequestPath + root.id),
                 headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.UNAUTHORIZED)
+                isError(HttpStatus.BAD_REQUEST)
             }
             flush()
             Assertions.assertEquals(1, contentService.getFolder(root.id).children.size)

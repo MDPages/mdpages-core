@@ -110,7 +110,10 @@ class ContentServiceImpl(
     @Transactional
     override fun createFolder(name: String, parentId: Long): Folder {
         validateFolderName(name)
-        val parentFolder: Folder = getObject(parentId) as Folder
+
+        val parentObject: MdObject = getObject(parentId)
+        if(parentObject !is Folder) throw InvalidParentException()
+        val parentFolder: Folder = parentObject as Folder
 
         //Check name duplicate
         if (mdObjectRepository.findFirstByFullPath(parentFolder.fullPath + "/" + name) != null)
@@ -134,7 +137,7 @@ class ContentServiceImpl(
     @Transactional
     override fun deleteFolder(id: Long) {
         val toDelete = getFolder(id)
-        if (toDelete.isRoot) throw UnauthorizedException()
+        if (toDelete.isRoot) throw InvalidParentException()
         if (toDelete.children.isNotEmpty()) throw FolderNotEmptyException()
 
         permissionRepository.deleteAllByScope(toDelete)

@@ -92,13 +92,13 @@ internal class PageControllerTest(
         }
 
         @Test
-        fun `Given invalid page id, should return 401`() {
+        fun `Given invalid page id, should return 404`() {
             grantReadPermission()
             mockMvc.get(
                 path = getRequestPath(testPageId + 1),
                 headers = HttpHeaders().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.UNAUTHORIZED)
+                isError(HttpStatus.NOT_FOUND)
             }
         }
 
@@ -175,20 +175,20 @@ internal class PageControllerTest(
         }
 
         @Test
-        fun `Given invalid parent folder id, should return 403`() {
+        fun `Given invalid parent folder id, should return 404`() {
             mockMvc.put(
                 path = createPageRequest,
                 headers = HttpHeaders().contentTypeJson().authorization(getAccessToken()),
                 body = mapper.writeValueAsString(CreatePageDTO(rootFolderId + 1, "testTitle", "testContent"))
             ) {
-                isError(HttpStatus.UNAUTHORIZED)
+                isError(HttpStatus.NOT_FOUND)
             }
             flush()
             Assertions.assertEquals(0, contentService.getFolder(rootFolderId).children.size)
         }
 
         @Test
-        fun `Given missing WRITE permission, should return 403`() {
+        fun `Given missing WRITE permission, should return 401`() {
             mockMvc.put(
                 path = createPageRequest,
                 headers = HttpHeaders().contentTypeJson(),
@@ -301,7 +301,7 @@ internal class PageControllerTest(
         }
 
         @Test
-        fun `Given missing WRITE permission, should return 403`() {
+        fun `Given missing WRITE permission, should return 401`() {
             mockMvc.patch(
                 path = getModifyPageRequest(testPageId),
                 headers = HttpHeaders().contentTypeJson(),
@@ -314,13 +314,13 @@ internal class PageControllerTest(
         }
 
         @Test
-        fun `Given invalid page id, should return 403`() {
+        fun `Given invalid page id, should return 404`() {
             mockMvc.patch(
                 path = getModifyPageRequest(testPageId + 1),
                 headers = HttpHeaders().contentTypeJson().authorization(getAccessToken()),
                 body = mapper.writeValueAsString(UpdatePageDTO("testTitle2", "testContent2"))
             ) {
-                isError(HttpStatus.UNAUTHORIZED)
+                isError(HttpStatus.NOT_FOUND)
             }
             flush()
             verifyPageUnchanged()
@@ -362,7 +362,7 @@ internal class PageControllerTest(
         }
 
         @Test
-        fun `Given missing WRITE permission, should return 403`() {
+        fun `Given missing WRITE permission, should return 401`() {
             mockMvc.delete(
                 path = getDeletePageRequest(testPageId),
                 headers = HttpHeaders()
@@ -374,12 +374,12 @@ internal class PageControllerTest(
         }
 
         @Test
-        fun `Given invalid page id, should return 403`() {
+        fun `Given invalid page id, should return 404`() {
             mockMvc.delete(
                 path = getDeletePageRequest(testPageId + 1),
                 headers = HttpHeaders().authorization(getAccessToken())
             ) {
-                isError(HttpStatus.UNAUTHORIZED)
+                isError(HttpStatus.NOT_FOUND)
             }
             flush()
             Assertions.assertNotNull(contentService.findPage(testPageId))
