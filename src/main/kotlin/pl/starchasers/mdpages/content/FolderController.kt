@@ -21,7 +21,7 @@ class FolderController(
      * If you need them, use [getFolderTree]
      * @param folderId Id of the queried folder
      */
-    @PathScopeSecured(PermissionType.READ, pathParameterName = "folderId")
+    @PathScopeSecured(PermissionType.READ)
     @GetMapping("/{folderId}")
     fun getFolder(@PathVariable(name = "folderId") folderId: Long): FolderResponseWrapperDTO =
         FolderResponseWrapperDTO(mapFolder(contentService.getFolder(folderId)))
@@ -30,7 +30,7 @@ class FolderController(
     /**
      * @param folderId Id of the queried folder
      */
-    @PathScopeSecured(PermissionType.READ, pathParameterName = "folderId")
+    @PathScopeSecured(PermissionType.READ)
     @GetMapping("/{folderId}/tree")
     fun getFolderTree(@PathVariable(name = "folderId") folderId: Long): FolderResponseWrapperDTO =
         FolderResponseWrapperDTO(mapFolder(contentService.getFolder(folderId), recursive = true))
@@ -56,7 +56,7 @@ class FolderController(
     /**
      * @param folderId Id of the folder to delete
      */
-    @PathScopeSecured(PermissionType.WRITE, pathParameterName = "folderId")
+    @PathScopeSecured(PermissionType.WRITE)
     @DeleteMapping("/{folderId}")
     fun deleteFolder(@PathVariable(name = "folderId") folderId: Long): BasicResponseDTO {
         contentService.deleteFolder(folderId)

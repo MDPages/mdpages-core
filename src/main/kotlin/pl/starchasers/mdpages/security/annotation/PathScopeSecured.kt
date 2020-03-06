@@ -9,4 +9,4 @@ import pl.starchasers.mdpages.security.permission.PermissionType
  *
  * @see ScopeSecured
  */
-annotation class PathScopeSecured(vararg val value: PermissionType, val pathParameterName: String = "objectId")
+annotation class PathScopeSecured(vararg val value: PermissionType, val pathParameterName: String = "")
