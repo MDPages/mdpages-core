@@ -2,6 +2,8 @@ package pl.starchasers.mdpages.content
 
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
+import pl.starchasers.mdpages.content.data.Folder
+import pl.starchasers.mdpages.content.data.Page
 import pl.starchasers.mdpages.content.data.dto.*
 import pl.starchasers.mdpages.security.annotation.PathScopeSecured
 import pl.starchasers.mdpages.security.annotation.ScopeSecured
@@ -21,15 +23,14 @@ class FolderController(
      */
     @PathScopeSecured(PermissionType.READ, pathParameterName = "folderId")
     @GetMapping("/{folderId}")
-    fun getFolder(@PathVariable(name = "folderId") folderId: Long): FolderResponseDTO {
-        TODO()
-    }
+    fun getFolder(@PathVariable(name = "folderId") folderId: Long): FolderResponseDTO =
+        mapFolder(contentService.getFolder(folderId))
+
 
     @PathScopeSecured(PermissionType.READ, pathParameterName = "folderId")
     @GetMapping("/{folderId}/tree")
-    fun getFolderTree(@PathVariable(name = "folderId") folderId: Long): FolderResponseDTO {
-        TODO()
-    }
+    fun getFolderTree(@PathVariable(name = "folderId") folderId: Long): FolderResponseDTO =
+        mapFolder(contentService.getFolder(folderId), recursive = true)
 
     /**
      * Returns list of scopes readable by current user. Scopes are folders with one difference, they have no parent.
@@ -58,4 +59,18 @@ class FolderController(
         contentService.deleteFolder(folderId)
         return BasicResponseDTO()
     }
+
+    private fun mapFolder(folder: Folder, recursive: Boolean = false, root: Boolean = true): FolderResponseDTO =
+        FolderResponseDTO(
+            folder.name,
+            folder.id,
+            if (recursive || root) folder.children.map { child ->
+                when (child.objectType) {
+                    MdObjectType.PAGE -> PageBriefResponseDTO(child.name, child.id)
+                    MdObjectType.FOLDER -> mapFolder(child as Folder, recursive, false)
+                    else -> throw IllegalStateException("Unknown object type ${child.objectType}")
+                }
+            }.toSet()
+            else emptySet()
+        )
 }
