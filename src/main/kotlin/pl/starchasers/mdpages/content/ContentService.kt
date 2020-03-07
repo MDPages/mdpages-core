@@ -92,7 +92,7 @@ class ContentServiceImpl(
 
     override fun findPage(id: Long): Page? = pageRepository.findFirstById(id)
 
-    override fun getScopesReadableByUser(userId: Long?): List<Folder> = folderRepository.findAll()
+    override fun getScopesReadableByUser(userId: Long?): List<Folder> = folderRepository.findAllScopes()
         .filter { permissionService.hasScopePermission(it.fullPath, PermissionType.READ, userId) }
 
 
