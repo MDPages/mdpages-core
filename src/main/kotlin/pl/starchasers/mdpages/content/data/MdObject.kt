@@ -1,6 +1,6 @@
 package pl.starchasers.mdpages.content.data
 
-import pl.starchasers.mdpages.content.ObjectType
+import pl.starchasers.mdpages.content.MdObjectType
 import javax.persistence.*
 
 @Entity
@@ -15,7 +15,7 @@ abstract class MdObject(
     var name: String,
 
     @Column(nullable = false)
-    val objectType: ObjectType,
+    val objectType: MdObjectType,
 
     @ManyToOne(fetch = FetchType.LAZY)
     var parent: Folder?,

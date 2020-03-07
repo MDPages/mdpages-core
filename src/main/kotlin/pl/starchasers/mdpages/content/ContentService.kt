@@ -11,6 +11,7 @@ import pl.starchasers.mdpages.content.repository.ObjectRepository
 import pl.starchasers.mdpages.content.repository.PageRepository
 import pl.starchasers.mdpages.security.permission.PermissionRepository
 import pl.starchasers.mdpages.security.permission.PermissionService
+import pl.starchasers.mdpages.security.permission.PermissionType
 import java.time.LocalDateTime
 import javax.transaction.Transactional
 
@@ -28,7 +29,7 @@ interface ContentService {
 
     fun createFolder(folder: Folder)
 
-    fun createFolder(name: String, parentId: Long): Long
+    fun createFolder(name: String, parentId: Long): Folder
 
     fun deleteFolder(id: Long)
 
@@ -53,6 +54,8 @@ interface ContentService {
     fun getPage(id: Long): Page
 
     fun findPage(id: Long): Page?
+
+    fun getScopesReadableByUser(userId: Long?): List<Folder>
 }
 
 @Service
@@ -60,7 +63,8 @@ class ContentServiceImpl(
     private val folderRepository: FolderRepository,
     private val pageRepository: PageRepository,
     private val mdObjectRepository: ObjectRepository,
-    private val permissionRepository: PermissionRepository
+    private val permissionRepository: PermissionRepository,
+    private val permissionService: PermissionService
 ) :
     ContentService {
 
@@ -88,6 +92,10 @@ class ContentServiceImpl(
 
     override fun findPage(id: Long): Page? = pageRepository.findFirstById(id)
 
+    override fun getScopesReadableByUser(userId: Long?): List<Folder> = folderRepository.findAllScopes()
+        .filter { permissionService.hasScopePermission(it.fullPath, PermissionType.READ, userId) }
+
+
     override fun createFolder(folder: Folder) {
         validateFolderName(folder.name)
         val parent = folder.parent
@@ -100,7 +108,7 @@ class ContentServiceImpl(
     }
 
     @Transactional
-    override fun createFolder(name: String, parentId: Long): Long {
+    override fun createFolder(name: String, parentId: Long): Folder {
         validateFolderName(name)
         val parentFolder: Folder = getObject(parentId) as Folder
 
@@ -120,7 +128,7 @@ class ContentServiceImpl(
         parentFolder.children.add(newFolder)
         folderRepository.save(parentFolder)
 
-        return newFolder.id
+        return newFolder
     }
 
     @Transactional

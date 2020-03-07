@@ -1,10 +1,7 @@
 package pl.starchasers.mdpages.content
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
 import no.skatteetaten.aurora.mockmvc.extensions.*
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -13,15 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.web.servlet.result.JsonPathResultMatchers
 import org.springframework.transaction.annotation.Transactional
 import pl.starchasers.mdpages.*
 import pl.starchasers.mdpages.authentication.TokenService
 import pl.starchasers.mdpages.content.data.Folder
 import pl.starchasers.mdpages.content.data.Page
-import pl.starchasers.mdpages.content.data.dto.CreateFolderDTO
 import pl.starchasers.mdpages.content.data.dto.CreatePageDTO
-import pl.starchasers.mdpages.content.data.dto.FolderIdResponseDTO
 import pl.starchasers.mdpages.content.data.dto.UpdatePageDTO
 import pl.starchasers.mdpages.security.permission.PermissionService
 import pl.starchasers.mdpages.security.permission.PermissionType
@@ -29,14 +23,12 @@ import pl.starchasers.mdpages.user.UserService
 import java.time.LocalDateTime
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-internal class ContentControllerTest(
+internal class PageControllerTest(
     @Autowired private val userService: UserService,
     @Autowired private val tokenService: TokenService,
     @Autowired private val permissionService: PermissionService,
     @Autowired private val contentService: ContentService
 ) : MockMvcTestBase() {
-
-
     @BeforeEach
     fun createTestUser() {
         userService.createUser("testUser", "password")
@@ -54,173 +46,70 @@ internal class ContentControllerTest(
     @Transactional
     @OrderTests
     @Nested
-    inner class CreateFolder : MockMvcTestBase() {
-
-        private val createFolderRequestPath = Path("/api/content/folder")
-        private lateinit var parent: Folder
+    inner class GetPage() : MockMvcTestBase() {
+        private fun getRequestPath(id: Long): Path = Path("/api/content/page/$id")
+        private var rootFolderId: Long = -1
+        private var testPageId: Long = -1
 
         @BeforeEach
-        fun createTestScope() {
+        fun setup() {
             val folder = Folder(true, mutableSetOf(), "root", null, null)
             contentService.createFolder(folder)
-            parent = folder
-        }
+            rootFolderId = folder.id
 
-        @DocumentResponse
-        @Test
-        fun `Given valid data, should create folder and return id`() {
-            grantWritePermission(parent)
-            mockMvc.put(
-                path = createFolderRequestPath,
-                body = mapper.writeValueAsString(CreateFolderDTO("testFolder", parent.id)),
-                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
-            ) {
-                isSuccess()
-                responseJsonPath("$.folderId").equalsLong(contentService.getFolder(parent.id).children.toList()[0].id)
-            }
-        }
-
-        @Test
-        fun `Given duplicate folder name, should return 400`() {
-            grantWritePermission(parent)
-            contentService.createFolder(Folder(false, mutableSetOf(), "testFolder", parent, parent))
-            mockMvc.put(
-                path = createFolderRequestPath,
-                body = mapper.writeValueAsString(CreateFolderDTO("testFolder", parent.id)),
-                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
-            ) {
-                isError(HttpStatus.BAD_REQUEST)
-            }
-        }
-
-        @Test
-        fun `Given invalid parentId, should return 401`() {
-            grantWritePermission(parent)
-            mockMvc.put(
-                path = createFolderRequestPath,
-                body = mapper.writeValueAsString(CreateFolderDTO("testFolder", 999)),
-                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
-            ) {
-                isError(HttpStatus.UNAUTHORIZED)
-            }
-        }
-
-        @Test
-        fun `Given page as parentId, should return 400`() {
-            //TODO: implement page creation
-        }
-
-        @Test
-        fun `Given missing WRITE permission, should return 401`() {
-            mockMvc.put(
-                path = createFolderRequestPath,
-                body = mapper.writeValueAsString(CreateFolderDTO("testFolder", parent.id)),
-                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
-            ) {
-                isError(HttpStatus.UNAUTHORIZED)
-            }
-        }
-    }
-
-    @Transactional
-    @OrderTests
-    @Nested
-    inner class DeleteFolder() : MockMvcTestBase() {
-
-        private val deleteFolderRequestPath = "/api/content/folder/"
-        private lateinit var testFolder: Folder
-        private lateinit var root: Folder
-
-        @BeforeEach
-        fun createTestFolder() {
-            root = Folder(true, mutableSetOf(), "root", null, null)
-            contentService.createFolder(root)
-            testFolder = Folder(false, mutableSetOf(), "testFolder", root, root)
-            contentService.createFolder(testFolder)
+            val page = contentService.createPage(rootFolderId, "testPage", "testContent")
+            testPageId = page.id
             flush()
         }
 
-        fun deleteTestFolder() {
-            contentService.deleteObjectRecursive(root)
+        private fun grantReadPermission() {
+            permissionService.grantScopePermission(
+                contentService.getFolder(rootFolderId),
+                PermissionType.READ,
+                userService.getUserByUsername("testUser")
+            )
             flush()
         }
 
         @DocumentResponse
         @Test
-        fun `Given valid data, should delete folder`() {
-            grantWritePermission(root)
-            mockMvc.delete(
-                path = Path(deleteFolderRequestPath + testFolder.id),
-                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
+        fun `Given valid data, should return page details`() {
+            grantReadPermission()
+
+            mockMvc.get(
+                path = getRequestPath(testPageId),
+                headers = HttpHeaders().authorization(getAccessToken())
             ) {
                 isSuccess()
+                responseJsonPath("$.page.id").equalsLong(testPageId)
+                responseJsonPath("$.page.name").equalsValue("testPage")
+                responseJsonPath("$.page.content").equalsValue("testContent")
+                responseJsonPath("$.page.dateCreated").isNotEmpty()
+                responseJsonPath("$.page.dateModified").isNotEmpty()
+                responseJsonPath("$.page.parentFolderId").equalsLong(rootFolderId)
+                responseJsonPath("$.page.scopeFolderId").equalsLong(rootFolderId)
             }
-            flush()
-            assertEquals(0, contentService.getFolder(root.id).children.size)
         }
 
         @Test
-        fun `Given not empty folder, should return 400`() {
-            grantWritePermission(root)
-            contentService.createFolder(Folder(false, mutableSetOf(), "child", testFolder, root))
-            mockMvc.delete(
-                path = Path(deleteFolderRequestPath + testFolder.id),
-                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
-            ) {
-                isError(HttpStatus.BAD_REQUEST)
-            }
-            flush()
-            assertEquals(1, contentService.getFolder(root.id).children.size)
-        }
-
-        @Test
-        fun `Given invalid folderId, should return 401`() {
-            grantWritePermission(root)
-            mockMvc.delete(
-                path = Path(deleteFolderRequestPath + 999),
-                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
+        fun `Given invalid page id, should return 401`() {
+            grantReadPermission()
+            mockMvc.get(
+                path = getRequestPath(testPageId + 1),
+                headers = HttpHeaders().authorization(getAccessToken())
             ) {
                 isError(HttpStatus.UNAUTHORIZED)
             }
-            flush()
-            assertEquals(1, contentService.getFolder(root.id).children.size)
         }
 
         @Test
-        fun `Given missing WRITE permission, should return 401`() {
-            mockMvc.delete(
-                path = Path(deleteFolderRequestPath + testFolder.id),
-                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
+        fun `Given missing READ permission, should return 401`() {
+            mockMvc.get(
+                path = getRequestPath(testPageId),
+                headers = HttpHeaders().authorization(getAccessToken())
             ) {
                 isError(HttpStatus.UNAUTHORIZED)
             }
-            flush()
-            assertEquals(1, contentService.getFolder(root.id).children.size)
-        }
-
-        @Test
-        fun `Given scope root, should return 401`() {
-            grantWritePermission(root)
-            mockMvc.delete(
-                path = Path(deleteFolderRequestPath + root.id),
-                headers = HttpHeaders().contentTypeJson().authorization(getAccessToken())
-            ) {
-                isError(HttpStatus.UNAUTHORIZED)
-            }
-            flush()
-            assertEquals(1, contentService.getFolder(root.id).children.size)
-        }
-
-        @Test
-        fun `Given not authenticated user, should return 401`() {
-            mockMvc.delete(
-                path = Path(deleteFolderRequestPath + testFolder.id),
-                headers = HttpHeaders().contentTypeJson()
-            ) {
-                isError(HttpStatus.UNAUTHORIZED)
-            }
-            flush()
-            assertEquals(1, contentService.getFolder(root.id).children.size)
         }
     }
 
@@ -256,9 +145,9 @@ internal class ContentControllerTest(
             flush()
 
             (contentService.getFolder(rootFolderId).children.elementAt(0) as Page).apply {
-                assertEquals("testTitle", name)
-                assertEquals("testContent", content)
-                assertEquals("/root/testTitle", fullPath)
+                Assertions.assertEquals("testTitle", name)
+                Assertions.assertEquals("testContent", content)
+                Assertions.assertEquals("/root/testTitle", fullPath)
             }
         }
 
@@ -295,7 +184,7 @@ internal class ContentControllerTest(
                 isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
-            assertEquals(0, contentService.getFolder(rootFolderId).children.size)
+            Assertions.assertEquals(0, contentService.getFolder(rootFolderId).children.size)
         }
 
         @Test
@@ -323,6 +212,7 @@ internal class ContentControllerTest(
 
     }
 
+
     @Transactional
     @OrderTests
     @Nested
@@ -345,8 +235,8 @@ internal class ContentControllerTest(
         }
 
         private fun verifyPageUnchanged() = contentService.getPage(testPageId).apply {
-            assertEquals("testTitle", name)
-            assertEquals("testContent", content)
+            Assertions.assertEquals("testTitle", name)
+            Assertions.assertEquals("testContent", content)
         }
 
         @DocumentResponse
@@ -362,9 +252,9 @@ internal class ContentControllerTest(
             flush()
 
             contentService.getPage(testPageId).apply {
-                assertEquals("testTitle2", name)
-                assertEquals("testContent2", content)
-                assertEquals("/root/testTitle2", fullPath)
+                Assertions.assertEquals("testTitle2", name)
+                Assertions.assertEquals("testContent2", content)
+                Assertions.assertEquals("/root/testTitle2", fullPath)
             }
 
         }
@@ -468,7 +358,7 @@ internal class ContentControllerTest(
                 isSuccess()
             }
             flush()
-            assertNull(contentService.findPage(testPageId))
+            Assertions.assertNull(contentService.findPage(testPageId))
         }
 
         @Test
@@ -480,7 +370,7 @@ internal class ContentControllerTest(
                 isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
-            assertNotNull(contentService.findPage(testPageId))
+            Assertions.assertNotNull(contentService.findPage(testPageId))
         }
 
         @Test
@@ -492,7 +382,8 @@ internal class ContentControllerTest(
                 isError(HttpStatus.UNAUTHORIZED)
             }
             flush()
-            assertNotNull(contentService.findPage(testPageId))
+            Assertions.assertNotNull(contentService.findPage(testPageId))
         }
     }
+
 }

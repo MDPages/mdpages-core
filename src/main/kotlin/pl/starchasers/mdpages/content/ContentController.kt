@@ -15,59 +15,9 @@ class ContentController(
     val contentService: ContentService
 ) {
 
-    @ScopeSecured(READ)
+    @PathScopeSecured(READ, pathParameterName = "objectId")
     @GetMapping("/object/{objectId}")
-    fun getContent(@PathVariable objectId: Long) {
+    fun getContent(@PathVariable(name = "objectId") objectId: Long): MdObjectResponseDTO {
         TODO()
-    }
-
-    @ScopeSecured(WRITE)
-    @PutMapping("/folder")
-    fun createFolder(@Validated @RequestBody createFolderDTO: CreateFolderDTO): FolderIdResponseDTO {
-        return FolderIdResponseDTO(contentService.createFolder(createFolderDTO.name, createFolderDTO.parent))
-    }
-
-    /**
-     * @param folderId Id of the folder to delete
-     */
-    @PathScopeSecured(WRITE, pathParameterName = "folderId")
-    @DeleteMapping("/folder/{folderId}")
-    fun deleteFolder(@PathVariable(name = "folderId") folderId: Long): BasicResponseDTO {
-        contentService.deleteFolder(folderId)
-        return BasicResponseDTO()
-    }
-
-    @ScopeSecured(WRITE)
-    @PutMapping("/page")
-    fun createPage(@RequestBody @Validated createPageDTO: CreatePageDTO): PageIdResponseDTO = PageIdResponseDTO(
-        contentService.createPage(
-            createPageDTO.parentId,
-            createPageDTO.title,
-            createPageDTO.content
-        ).id
-    )
-
-    /**
-     * @param pageId Id of modified page
-     */
-    @PathScopeSecured(WRITE, pathParameterName = "pageId")
-    @PatchMapping("/page/{pageId}")
-    fun updatePage(@PathVariable(name = "pageId") pageId: Long, @RequestBody @Validated updatePageDTO: UpdatePageDTO): BasicResponseDTO {
-        contentService.modifyPage(pageId, updatePageDTO.title, updatePageDTO.content)
-        return BasicResponseDTO()
-    }
-
-    fun movePage() {
-        //TODO implement
-    }
-
-    /**
-     * @param pageId Id of page to delete
-     */
-    @PathScopeSecured(WRITE, pathParameterName = "pageId")
-    @DeleteMapping("/page/{pageId}")
-    fun deletePage(@PathVariable(name = "pageId") pageId: Long): BasicResponseDTO {
-        contentService.deletePage(pageId)
-        return BasicResponseDTO()
     }
 }
