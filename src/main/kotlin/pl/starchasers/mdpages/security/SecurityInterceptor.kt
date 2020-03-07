@@ -2,11 +2,13 @@ package pl.starchasers.mdpages.security
 
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.HandlerMapping
 import pl.starchasers.mdpages.authentication.UnauthorizedException
 import pl.starchasers.mdpages.content.ContentService
+import pl.starchasers.mdpages.content.exception.ObjectDoesntExistException
 import pl.starchasers.mdpages.security.annotation.PathScopeSecured
 import pl.starchasers.mdpages.security.permission.PermissionService
 import javax.servlet.http.HttpServletRequest
@@ -22,9 +24,19 @@ class SecurityInterceptor(
         val annotation = handler.getMethodAnnotation(PathScopeSecured::class.java) ?: return true
         val pathVariables = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as Map<String, String>
 
-        val objectId = pathVariables[annotation.pathParameterName]?.toLongOrNull() ?: throw UnauthorizedException()
+        val pathVariableList =
+            handler.methodParameters.asList().mapNotNull { it.getParameterAnnotation(PathVariable::class.java) }
 
-        val scope = contentService.findObject(objectId)?.run { scope ?: this } ?: throw UnauthorizedException()
+        val pathParameterName =
+            when {
+                annotation.pathParameterName.isNotBlank() -> annotation.pathParameterName
+                pathVariableList.size > 1 -> throw AmbiguousSecurityAnnotationException()
+                else -> pathVariableList[0].name
+            }
+
+        val objectId = pathVariables[pathParameterName]?.toLongOrNull() ?: throw ObjectDoesntExistException()
+
+        val scope = contentService.findObject(objectId)?.run { scope ?: this } ?: throw ObjectDoesntExistException()
         val authentication: Authentication? = SecurityContextHolder.getContext().authentication
 
         if (annotation.value.any { permissionType ->

@@ -1,6 +1,5 @@
 package pl.starchasers.mdpages.authentication
 
-import org.aspectj.weaver.ast.Not
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -9,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController
 import pl.starchasers.mdpages.authentication.dto.LoginDTO
 import pl.starchasers.mdpages.authentication.dto.TokenDTO
 import pl.starchasers.mdpages.authentication.dto.TokenResponseDTO
-import pl.starchasers.mdpages.security.annotation.IsUser
 import pl.starchasers.mdpages.user.UserService
 import pl.starchasers.mdpages.util.ApplicationException
 import pl.starchasers.mdpages.util.BasicResponseDTO

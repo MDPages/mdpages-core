@@ -18,7 +18,7 @@ class PageController(
     /**
      * @param pageId Id of the queried page
      */
-    @PathScopeSecured(PermissionType.READ, pathParameterName = "pageId")
+    @PathScopeSecured(PermissionType.READ)
     @GetMapping("/{pageId}")
     fun getPage(@PathVariable(name = "pageId") pageId: Long): PageDetailsResponseWrapperDTO =
         contentService.getPage(pageId).run {
@@ -49,7 +49,7 @@ class PageController(
     /**
      * @param pageId Id of modified page
      */
-    @PathScopeSecured(PermissionType.WRITE, pathParameterName = "pageId")
+    @PathScopeSecured(PermissionType.WRITE)
     @PatchMapping("/{pageId}")
     fun updatePage(@PathVariable(name = "pageId") pageId: Long, @RequestBody @Validated updatePageDTO: UpdatePageDTO): BasicResponseDTO {
         contentService.modifyPage(pageId, updatePageDTO.title, updatePageDTO.content)
@@ -63,7 +63,7 @@ class PageController(
     /**
      * @param pageId Id of page to delete
      */
-    @PathScopeSecured(PermissionType.WRITE, pathParameterName = "pageId")
+    @PathScopeSecured(PermissionType.WRITE)
     @DeleteMapping("/{pageId}")
     fun deletePage(@PathVariable(name = "pageId") pageId: Long): BasicResponseDTO {
         contentService.deletePage(pageId)
